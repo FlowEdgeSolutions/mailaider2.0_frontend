@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from './Header';
 import { EmailViewer } from './EmailViewer';
@@ -9,22 +9,11 @@ import { SettingsModal } from './SettingsModal';
 import { StatusPopup } from './StatusPopup';
 import { Tutorial } from './Tutorial';
 import { ApiKeyInput } from './ApiKeyInput';
-import { outlookService, type OutlookEmailData, type OutlookComposeData } from '@/services/outlookService';
-import { aiService, type AIServiceConfig } from '@/services/aiService';
-
-interface EmailData {
-  subject: string;
-  sender: string;
-  content: string;
-  summary: string;
-}
-
-interface ComposeData {
-  to: string[];
-  cc: string[];
-  subject: string;
-  purpose: string;
-}
+import { useOfficeInitialization } from '@/hooks/useOfficeInitialization';
+import { useApiKeyManagement } from '@/hooks/useApiKeyManagement';
+import { useAIProcessing } from '@/hooks/useAIProcessing';
+import { useTutorial } from '@/hooks/useTutorial';
+import { useAppActions } from '@/hooks/useAppActions';
 
 interface SettingsData {
   tone: string;
@@ -35,31 +24,10 @@ interface SettingsData {
 
 export function MailAiderApp() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [emailData, setEmailData] = useState<EmailData>({
-    subject: 'Lade Betreff...',
-    sender: 'Lade Absender...',
-    content: '',
-    summary: 'Lade Zusammenfassung...'
-  });
-  const [composeData, setComposeData] = useState<ComposeData>({
-    to: [],
-    cc: [],
-    subject: '',
-    purpose: ''
-  });
-  
   const [currentAction, setCurrentAction] = useState('antworten');
-  const [isConnected, setIsConnected] = useState(false);
-  const [isComposeMode, setIsComposeMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [showStatusPopup, setShowStatusPopup] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('');
-  const [chatOutput, setChatOutput] = useState('Warte auf Ausgabe...');
   const [showSummary, setShowSummary] = useState(false);
   const [showComposeDetails, setShowComposeDetails] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   
   const [settings, setSettings] = useState<SettingsData>({
     tone: 'formell',
@@ -68,97 +36,55 @@ export function MailAiderApp() {
     language: 'deutsch'
   });
 
-  useEffect(() => {
-    // Check if user is visiting for the first time
-    const hasSeenTutorial = localStorage.getItem('mailaider-tutorial-completed');
-    if (!hasSeenTutorial) {
-      setShowTutorial(true);
+  // Custom hooks
+  const {
+    isConnected,
+    isComposeMode,
+    isLoading: officeLoading,
+    emailData,
+    composeData,
+    setEmailData
+  } = useOfficeInitialization();
+
+  const {
+    showApiKeyInput,
+    setShowApiKeyInput,
+    handleApiKeySubmit
+  } = useApiKeyManagement();
+
+  const {
+    isLoading: aiLoading,
+    chatOutput,
+    setChatOutput,
+    processEmailWithAI,
+    generateSummary
+  } = useAIProcessing();
+
+  const {
+    showTutorial,
+    handleTutorialComplete,
+    handleTutorialSkip
+  } = useTutorial();
+
+  const {
+    showStatusPopup,
+    setShowStatusPopup,
+    statusMessage,
+    copyToClipboard,
+    insertReply,
+    showDsgvoInfo
+  } = useAppActions();
+
+  // Derived state
+  const isLoading = officeLoading || aiLoading;
+
+  // Update current action based on mode
+  React.useEffect(() => {
+    if (isComposeMode && currentAction === 'antworten') {
+      setCurrentAction('verfassen');
+      setChatOutput('Bereit zum Verfassen einer neuen E-Mail...');
     }
-
-    // Check if API key is configured
-    const savedApiKey = localStorage.getItem('mailaider-api-key');
-    if (savedApiKey) {
-      aiService.setConfig({ apiKey: savedApiKey });
-    } else {
-      setShowApiKeyInput(true);
-    }
-
-    // Initialize Office.js and load email/compose data
-    const initializeApp = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Initialize Office.js
-        await outlookService.initializeOffice();
-        
-        // Check if we're in compose mode
-        const composeMode = outlookService.isComposeMode();
-        setIsComposeMode(composeMode);
-        
-        if (composeMode) {
-          // Load compose data
-          const currentCompose = await outlookService.getComposeData();
-          setComposeData({
-            to: currentCompose.to,
-            cc: currentCompose.cc,
-            subject: currentCompose.subject,
-            purpose: 'Neue E-Mail verfassen'
-          });
-          setCurrentAction('verfassen');
-          setChatOutput('Bereit zum Verfassen einer neuen E-Mail...');
-        } else {
-          // Load current email data (read mode)
-          const currentEmail = await outlookService.getCurrentEmailData();
-          setEmailData({
-            subject: currentEmail.subject,
-            sender: currentEmail.sender,
-            content: currentEmail.content,
-            summary: 'Klicken Sie auf "Zusammenfassung anzeigen" um eine KI-Zusammenfassung zu erhalten'
-          });
-        }
-        
-        setIsConnected(true);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Initialization error:', error);
-        // Fallback für Development - simuliere compose mode basierend auf URL oder anderen Faktoren
-        const simulateCompose = window.location.search.includes('compose=true');
-        setIsComposeMode(simulateCompose);
-        
-        if (simulateCompose) {
-          setComposeData({
-            to: ['beispiel@domain.com'],
-            cc: [],
-            subject: 'Neues Projekt',
-            purpose: 'Projektplanung besprechen'
-          });
-          setCurrentAction('verfassen');
-          setChatOutput('Development Modus - Compose Mode');
-        } else {
-          setEmailData({
-            subject: 'Projektbesprechung für nächste Woche',
-            sender: 'maria.mueller@example.com',
-            content: 'Hallo James,\n\nIch hoffe, es geht dir gut. Ich wollte mich bezüglich der Projektbesprechung für nächste Woche bei dir melden. Könnten wir einen Termin für Dienstag oder Mittwoch vereinbaren?\n\nEs wäre wichtig, dass wir die aktuellen Fortschritte besprechen und die nächsten Schritte planen. Bitte lass mich wissen, welcher Tag dir besser passt.\n\nVielen Dank und beste Grüße,\nMaria',
-            summary: 'Development Modus - echte Daten verfügbar nach Outlook Integration'
-          });
-        }
-        setIsConnected(true);
-        setIsLoading(false);
-      }
-    };
-
-    initializeApp();
-  }, []);
-
-  const handleTutorialComplete = () => {
-    localStorage.setItem('mailaider-tutorial-completed', 'true');
-    setShowTutorial(false);
-  };
-
-  const handleTutorialSkip = () => {
-    localStorage.setItem('mailaider-tutorial-completed', 'true');
-    setShowTutorial(false);
-  };
+  }, [isComposeMode, currentAction, setChatOutput]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -168,146 +94,44 @@ export function MailAiderApp() {
   const handleActionSelect = (action: string) => {
     setCurrentAction(action);
     if (isConnected) {
-      // Immediate response for fluid UX
       requestAnimationFrame(() => {
         setIsSettingsOpen(true);
       });
     }
   };
 
-  const handleApiKeySubmit = (apiKey: string) => {
-    localStorage.setItem('mailaider-api-key', apiKey);
-    aiService.setConfig({ apiKey });
-    setShowApiKeyInput(false);
-    setStatusMessage('API Key erfolgreich konfiguriert!');
+  const handleApiKeySubmitWithStatus = (apiKey: string) => {
+    const message = handleApiKeySubmit(apiKey);
     setShowStatusPopup(true);
   };
 
   const handleSettingsSubmit = async (userPrompt: string, recipientName?: string) => {
     setIsSettingsOpen(false);
-    setIsLoading(true);
-    setChatOutput('Verarbeitung läuft...');
-    
-    if (!aiService.isConfigured()) {
-      setChatOutput('❌ API Key nicht konfiguriert. Bitte fügen Sie Ihren API Key hinzu.');
-      setIsLoading(false);
-      setShowApiKeyInput(true);
-      return;
-    }
-
-    try {
-      let actionType: 'summarize' | 'reply' | 'translate' | 'custom' | 'compose';
-      
-      switch (currentAction) {
-        case 'zusammenfassen':
-          actionType = 'summarize';
-          break;
-        case 'antworten':
-          actionType = 'reply';
-          break;
-        case 'übersetzen':
-          actionType = 'translate';
-          break;
-        case 'verfassen':
-          actionType = 'compose';
-          break;
-        case 'freierModus':
-          actionType = 'custom';
-          break;
-        default:
-          actionType = 'custom';
-      }
-
-      const requestData: any = {
-        action: actionType,
-        settings,
-        customPrompt: userPrompt,
-        recipientName
-      };
-
-      if (isComposeMode) {
-        requestData.composeContext = {
-          to: composeData.to,
-          subject: composeData.subject,
-          purpose: userPrompt || composeData.purpose
-        };
-      } else {
-        requestData.emailContent = emailData.content;
-      }
-
-      const result = await aiService.processEmail(requestData);
-
-      if (result.success) {
-        setChatOutput(result.result);
-      } else {
-        setChatOutput(`❌ Fehler: ${result.error}`);
-      }
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error during processing:', error);
-      setChatOutput('❌ Fehler bei der Verarbeitung. Bitte versuchen Sie es erneut.');
-      setIsLoading(false);
-    }
+    await processEmailWithAI(
+      currentAction,
+      userPrompt,
+      recipientName,
+      settings,
+      isComposeMode,
+      emailData,
+      composeData,
+      setShowApiKeyInput
+    );
   };
 
   const handleSummaryToggle = async () => {
     if (!showSummary && !emailData.summary.includes('•')) {
-      // Generate summary if not yet generated
-      setIsLoading(true);
-      
-      try {
-        const result = await aiService.processEmail({
-          action: 'summarize',
-          emailContent: emailData.content,
-          settings
-        });
-
-        if (result.success) {
-          setEmailData(prev => ({ ...prev, summary: result.result }));
-        }
-      } catch (error) {
-        console.error('Summary generation error:', error);
-      } finally {
-        setIsLoading(false);
-      }
+      await generateSummary(emailData.content, settings, setEmailData);
     }
-    
     setShowSummary(!showSummary);
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(chatOutput);
-    setStatusMessage('Text wurde in die Zwischenablage kopiert');
-    setShowStatusPopup(true);
+  const handleCopyToClipboard = () => {
+    copyToClipboard(chatOutput);
   };
 
-  const insertReply = async () => {
-    try {
-      if (isComposeMode) {
-        await outlookService.insertComposeText(chatOutput);
-        setStatusMessage('Text wurde in die E-Mail eingefügt');
-      } else {
-        await outlookService.insertReplyText(chatOutput);
-        setStatusMessage('Antwort wurde in das Antwortformular eingefügt');
-      }
-      setShowStatusPopup(true);
-    } catch (error) {
-      console.error('Insert text error:', error);
-      setStatusMessage('Fehler beim Einfügen des Textes');
-      setShowStatusPopup(true);
-    }
-  };
-
-  const showDsgvoInfo = () => {
-    setStatusMessage(`**DSGVO-sichere KI-Verarbeitung**
-
-Ihre Daten werden sicher verarbeitet:
-• Verschlüsselte Übertragung
-• Keine Datenspeicherung nach Verarbeitung  
-• Konform mit Schweizer Datenschutzgesetzen
-• Keine Verwendung für Training`);
-    setShowStatusPopup(true);
+  const handleInsertReply = () => {
+    insertReply(chatOutput, isComposeMode);
   };
 
   return (
@@ -340,8 +164,8 @@ Ihre Daten werden sicher verarbeitet:
           output={chatOutput}
           isLoading={isLoading}
           currentAction={currentAction}
-          onCopy={copyToClipboard}
-          onInsertReply={insertReply}
+          onCopy={handleCopyToClipboard}
+          onInsertReply={handleInsertReply}
         />
 
         <ActionButtons 
@@ -374,7 +198,7 @@ Ihre Daten werden sicher verarbeitet:
 
         <ApiKeyInput
           isVisible={showApiKeyInput}
-          onSubmit={handleApiKeySubmit}
+          onSubmit={handleApiKeySubmitWithStatus}
           onSkip={() => setShowApiKeyInput(false)}
         />
 
