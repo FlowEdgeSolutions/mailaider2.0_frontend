@@ -71,14 +71,14 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Tonfall:</label>
                 <Select value={settings.tone} onValueChange={(value) => updateSetting('tone', value)}>
-                  <SelectTrigger className="input-modern">
+                  <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="formell">Formell</SelectItem>
-                    <SelectItem value="informell">Informell</SelectItem>
-                    <SelectItem value="höflich">Höflich</SelectItem>
-                    <SelectItem value="direkt">Direkt & prägnant</SelectItem>
+                  <SelectContent className="bg-surface border-2 border-border shadow-lg">
+                    <SelectItem value="formell" className="hover:bg-accent focus:bg-accent text-foreground">Formell</SelectItem>
+                    <SelectItem value="informell" className="hover:bg-accent focus:bg-accent text-foreground">Informell</SelectItem>
+                    <SelectItem value="höflich" className="hover:bg-accent focus:bg-accent text-foreground">Höflich</SelectItem>
+                    <SelectItem value="direkt" className="hover:bg-accent focus:bg-accent text-foreground">Direkt & prägnant</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -86,12 +86,12 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Anrede:</label>
                 <Select value={settings.greeting} onValueChange={(value) => updateSetting('greeting', value)}>
-                  <SelectTrigger className="input-modern">
+                  <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="informell">Du (informell)</SelectItem>
-                    <SelectItem value="formell">Sie (formell)</SelectItem>
+                  <SelectContent className="bg-surface border-2 border-border shadow-lg">
+                    <SelectItem value="informell" className="hover:bg-accent focus:bg-accent text-foreground">Du (informell)</SelectItem>
+                    <SelectItem value="formell" className="hover:bg-accent focus:bg-accent text-foreground">Sie (formell)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -99,13 +99,13 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Länge:</label>
                 <Select value={settings.length} onValueChange={(value) => updateSetting('length', value)}>
-                  <SelectTrigger className="input-modern">
+                  <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="kurz">Kurz</SelectItem>
-                    <SelectItem value="mittel">Mittel</SelectItem>
-                    <SelectItem value="lang">Lang</SelectItem>
+                  <SelectContent className="bg-surface border-2 border-border shadow-lg">
+                    <SelectItem value="kurz" className="hover:bg-accent focus:bg-accent text-foreground">Kurz</SelectItem>
+                    <SelectItem value="mittel" className="hover:bg-accent focus:bg-accent text-foreground">Mittel</SelectItem>
+                    <SelectItem value="lang" className="hover:bg-accent focus:bg-accent text-foreground">Lang</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -116,14 +116,14 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">Zielsprache:</label>
               <Select value={settings.language} onValueChange={(value) => updateSetting('language', value)}>
-                <SelectTrigger className="input-modern">
+                <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="deutsch">Deutsch</SelectItem>
-                  <SelectItem value="englisch">Englisch</SelectItem>
-                  <SelectItem value="französisch">Französisch</SelectItem>
-                  <SelectItem value="italienisch">Italienisch</SelectItem>
+                <SelectContent className="bg-surface border-2 border-border shadow-lg">
+                  <SelectItem value="deutsch" className="hover:bg-accent focus:bg-accent text-foreground">Deutsch</SelectItem>
+                  <SelectItem value="englisch" className="hover:bg-accent focus:bg-accent text-foreground">Englisch</SelectItem>
+                  <SelectItem value="französisch" className="hover:bg-accent focus:bg-accent text-foreground">Französisch</SelectItem>
+                  <SelectItem value="italienisch" className="hover:bg-accent focus:bg-accent text-foreground">Italienisch</SelectItem>
                 </SelectContent>
               </Select>
             </div>
