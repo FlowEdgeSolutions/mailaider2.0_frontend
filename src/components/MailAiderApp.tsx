@@ -89,8 +89,17 @@ export function MailAiderApp() {
     setIsLoading(true);
     setChatOutput('');
     
-    // Simulate AI processing
-    setTimeout(() => {
+    // Simulate realistic AI processing with stages
+    try {
+      // Stage 1: Thinking (2 seconds)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Stage 2: Processing (3 seconds)  
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Stage 3: Generating (2 seconds)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       let response = '';
       
       switch (currentAction) {
@@ -98,7 +107,7 @@ export function MailAiderApp() {
           response = `📋 **Zusammenfassung der E-Mail:**
 
 • **Hauptthema:** Projektbesprechung für die kommende Woche
-• **Terminvorschläge:** Dienstag oder Mittwoch
+• **Terminvorschläge:** Dienstag oder Mittwoch  
 • **Zweck:** Aktuellen Projektfortschritt besprechen und weitere Schritte planen
 • **Status:** Wartet auf Terminbestätigung von dir
 • **Priorität:** Wichtig - zeitnahe Antwort erforderlich
@@ -149,7 +158,11 @@ ${emailData.content}
       
       setChatOutput(response);
       setIsLoading(false);
-    }, 3000);
+    } catch (error) {
+      console.error('Error during processing:', error);
+      setChatOutput('❌ Fehler bei der Verarbeitung. Bitte versuchen Sie es erneut.');
+      setIsLoading(false);
+    }
   };
 
   const copyToClipboard = () => {

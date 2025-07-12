@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Copy, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ModernLoading } from './ModernLoading';
 
 interface ChatInterfaceProps {
   output: string;
@@ -11,6 +12,31 @@ interface ChatInterfaceProps {
 }
 
 export function ChatInterface({ output, isLoading, currentAction, onCopy, onInsertReply }: ChatInterfaceProps) {
+  const [loadingStage, setLoadingStage] = useState<'thinking' | 'processing' | 'generating'>('thinking');
+  const [loadingMessage, setLoadingMessage] = useState('');
+
+  // Cycle through loading stages when processing
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const stages = [
+      { stage: 'thinking' as const, duration: 1000, message: 'KI analysiert Ihre Anfrage...' },
+      { stage: 'processing' as const, duration: 1500, message: 'Optimale Lösung wird erstellt...' },
+      { stage: 'generating' as const, duration: 1000, message: 'Antwort wird formuliert...' }
+    ];
+
+    let currentStageIndex = 0;
+    setLoadingStage(stages[0].stage);
+    setLoadingMessage(stages[0].message);
+
+    const interval = setInterval(() => {
+      currentStageIndex = (currentStageIndex + 1) % stages.length;
+      setLoadingStage(stages[currentStageIndex].stage);
+      setLoadingMessage(stages[currentStageIndex].message);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isLoading]);
   return (
     <div className="card-modern p-4 space-y-3 animate-slide-up">
       <div className="flex items-center gap-3 mb-3">
@@ -27,14 +53,12 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
         )}
       </div>
 
-      <div className="bg-accent/30 rounded-xl p-3 min-h-[150px] max-h-[250px] overflow-y-auto">
+      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-4 min-h-[180px] max-h-[280px] overflow-y-auto border border-accent/20">
         {isLoading ? (
-          <div className="flex items-center justify-center h-24">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-6 h-6 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-              <p className="text-sm font-body text-muted-foreground">KI verarbeitet Ihre Anfrage...</p>
-            </div>
-          </div>
+          <ModernLoading 
+            stage={loadingStage} 
+            message={loadingMessage}
+          />
         ) : (
           <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line">
             {output}
