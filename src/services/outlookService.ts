@@ -59,10 +59,14 @@ class OutlookServiceImpl implements OutlookService {
           
           if (info.host === Office.HostType.Outlook) {
             this.isInitialized = true;
-            // Detect if we're in compose mode - simplified logic
-            this.composeMode = Office.context.mailbox.item && 
-                              Office.context.mailbox.item.itemType === Office.MailboxEnums.ItemType.Message &&
-                              !Office.context.mailbox.item.itemId; // No itemId means it's a new compose
+            // Detect if we're in compose mode
+            if (Office.context.mailbox.item) {
+              const item = Office.context.mailbox.item;
+              // Check if it's a compose message (no itemId means new message)
+              this.composeMode = item.itemType === Office.MailboxEnums.ItemType.Message && !item.itemId;
+            } else {
+              this.composeMode = false;
+            }
             
             console.log('📧 Compose-Modus erkannt:', this.composeMode);
             resolve();
