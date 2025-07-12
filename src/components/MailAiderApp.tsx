@@ -6,6 +6,7 @@ import { ActionButtons } from './ActionButtons';
 import { ChatInterface } from './ChatInterface';
 import { SettingsModal } from './SettingsModal';
 import { StatusPopup } from './StatusPopup';
+import { Tutorial } from './Tutorial';
 
 interface EmailData {
   subject: string;
@@ -38,6 +39,7 @@ export function MailAiderApp() {
   const [statusMessage, setStatusMessage] = useState('');
   const [chatOutput, setChatOutput] = useState('Warte auf Ausgabe...');
   const [showSummary, setShowSummary] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
   
   const [settings, setSettings] = useState<SettingsData>({
     tone: 'formell',
@@ -47,6 +49,12 @@ export function MailAiderApp() {
   });
 
   useEffect(() => {
+    // Check if user is visiting for the first time
+    const hasSeenTutorial = localStorage.getItem('mailaider-tutorial-completed');
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+    }
+
     // Simulate Office.js initialization
     const initializeApp = async () => {
       try {
@@ -71,6 +79,16 @@ export function MailAiderApp() {
 
     initializeApp();
   }, []);
+
+  const handleTutorialComplete = () => {
+    localStorage.setItem('mailaider-tutorial-completed', 'true');
+    setShowTutorial(false);
+  };
+
+  const handleTutorialSkip = () => {
+    localStorage.setItem('mailaider-tutorial-completed', 'true');
+    setShowTutorial(false);
+  };
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -223,7 +241,7 @@ Ihre Daten werden sicher verarbeitet:
           isConnected={isConnected}
         />
 
-        <SettingsModal
+        <SettingsModal 
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
           currentAction={currentAction}
@@ -236,6 +254,12 @@ Ihre Daten werden sicher verarbeitet:
           isOpen={showStatusPopup}
           message={statusMessage}
           onClose={() => setShowStatusPopup(false)}
+        />
+
+        <Tutorial
+          isVisible={showTutorial}
+          onComplete={handleTutorialComplete}
+          onSkip={handleTutorialSkip}
         />
 
         <Toaster />

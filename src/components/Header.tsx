@@ -27,6 +27,7 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
         <div className="flex items-center gap-2">
           <button
             onClick={onStatusClick}
+            data-tutorial="status"
             className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 ${
               isConnected 
                 ? 'bg-success/10 text-success hover:bg-success/20' 

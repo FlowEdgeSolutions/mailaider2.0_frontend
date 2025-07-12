@@ -36,7 +36,7 @@ const actions = [
 
 export function ActionButtons({ currentAction, onActionSelect, isConnected }: ActionButtonsProps) {
   return (
-    <div className="card-modern p-4 animate-bounce-in">
+    <div className="card-modern p-4 animate-bounce-in" data-tutorial="action-buttons">
       <div className="flex gap-2 justify-between">
         {actions.map((action) => {
           const Icon = action.icon;

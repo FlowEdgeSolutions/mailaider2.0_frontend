@@ -51,7 +51,7 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
     return () => clearInterval(interval);
   }, [isLoading, output]);
   return (
-    <div className="card-modern p-4 space-y-3 animate-slide-up">
+    <div className="card-modern p-4 space-y-3 animate-slide-up" data-tutorial="chat-interface">
       <div className="flex items-center gap-3 mb-3">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{
           background: 'linear-gradient(135deg, #007AFF 0%, #00C851 100%)'
