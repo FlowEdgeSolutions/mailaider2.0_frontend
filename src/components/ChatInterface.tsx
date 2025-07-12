@@ -14,11 +14,24 @@ interface ChatInterfaceProps {
 export function ChatInterface({ output, isLoading, currentAction, onCopy, onInsertReply }: ChatInterfaceProps) {
   const [loadingStage, setLoadingStage] = useState<'thinking' | 'processing' | 'generating'>('thinking');
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [showOutput, setShowOutput] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Cycle through loading stages when processing
   useEffect(() => {
-    if (!isLoading) return;
+    if (!isLoading) {
+      // When loading stops, trigger elegant transition
+      if (output && output !== 'Warte auf Ausgabe...') {
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setShowOutput(true);
+          setIsTransitioning(false);
+        }, 300);
+      }
+      return;
+    }
 
+    setShowOutput(false);
     const stages = [
       { stage: 'thinking' as const, duration: 1000, message: 'KI analysiert Ihre Anfrage...' },
       { stage: 'processing' as const, duration: 1500, message: 'Optimale Lösung wird erstellt...' },
@@ -36,7 +49,7 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isLoading]);
+  }, [isLoading, output]);
   return (
     <div className="card-modern p-4 space-y-3 animate-slide-up">
       <div className="flex items-center gap-3 mb-3">
@@ -53,21 +66,29 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
         )}
       </div>
 
-      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-4 min-h-[180px] max-h-[280px] overflow-y-auto border border-accent/20">
-        {isLoading ? (
-          <ModernLoading 
-            stage={loadingStage} 
-            message={loadingMessage}
-          />
+      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-4 min-h-[180px] max-h-[280px] overflow-hidden border border-accent/20 relative">
+        {isLoading || isTransitioning ? (
+          <div className={`transition-all duration-500 ${isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+            <ModernLoading 
+              stage={loadingStage} 
+              message={loadingMessage}
+            />
+          </div>
         ) : (
-          <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line">
-            {output}
+          <div className={`transition-all duration-700 ease-out overflow-y-auto max-h-full ${
+            showOutput 
+              ? 'opacity-100 transform translate-y-0 scale-100' 
+              : 'opacity-0 transform translate-y-4 scale-95'
+          }`}>
+            <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line animate-fade-in">
+              {output}
+            </div>
           </div>
         )}
       </div>
 
-      {!isLoading && output !== 'Warte auf Ausgabe...' && (
-        <div className="flex gap-2">
+      {!isLoading && !isTransitioning && showOutput && output !== 'Warte auf Ausgabe...' && (
+        <div className="flex gap-2 animate-slide-up" style={{ animationDelay: '0.3s' }}>
           <Button
             onClick={onCopy}
             variant="outline"
