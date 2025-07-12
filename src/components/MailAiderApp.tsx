@@ -177,7 +177,7 @@ Ihre Daten werden sicher verarbeitet:
 
   return (
     <div className={`min-h-screen bg-background-secondary transition-all duration-500 ${isDarkMode ? 'dark' : ''}`}>
-      <div className="max-w-md mx-auto p-4 space-y-6">
+      <div className="max-w-md mx-auto p-3 space-y-3">
         <Header 
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
@@ -192,13 +192,7 @@ Ihre Daten werden sicher verarbeitet:
           isLoading={isLoading}
         />
 
-        <ActionButtons 
-          currentAction={currentAction}
-          onActionSelect={handleActionSelect}
-          isConnected={isConnected}
-        />
-
-        <ChatInterface 
+        <ChatInterface
           output={chatOutput}
           isLoading={isLoading}
           currentAction={currentAction}
@@ -206,7 +200,13 @@ Ihre Daten werden sicher verarbeitet:
           onInsertReply={insertReply}
         />
 
-        <SettingsModal 
+        <ActionButtons 
+          currentAction={currentAction}
+          onActionSelect={handleActionSelect}
+          isConnected={isConnected}
+        />
+
+        <SettingsModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
           currentAction={currentAction}

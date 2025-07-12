@@ -12,8 +12,8 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ output, isLoading, currentAction, onCopy, onInsertReply }: ChatInterfaceProps) {
   return (
-    <div className="card-modern p-6 space-y-4 animate-slide-up">
-      <div className="flex items-center gap-3 mb-4">
+    <div className="card-modern p-4 space-y-3 animate-slide-up">
+      <div className="flex items-center gap-3 mb-3">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{
           background: 'linear-gradient(135deg, #007AFF 0%, #00C851 100%)'
         }}>
@@ -27,11 +27,11 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
         )}
       </div>
 
-      <div className="bg-accent/30 rounded-xl p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
+      <div className="bg-accent/30 rounded-xl p-3 min-h-[150px] max-h-[250px] overflow-y-auto">
         {isLoading ? (
-          <div className="flex items-center justify-center h-32">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <div className="flex items-center justify-center h-24">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-6 h-6 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
               <p className="text-sm text-muted-foreground">KI verarbeitet Ihre Anfrage...</p>
             </div>
           </div>
