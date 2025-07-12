@@ -124,7 +124,7 @@ export function MailAiderApp() {
       let response = '';
       
       switch (currentAction) {
-        case 'zusammenfassen':
+        case 'zusammenfassen':{
           response = `📋 **Zusammenfassung der E-Mail:**
 
 • **Hauptthema:** Projektbesprechung für die kommende Woche
@@ -135,8 +135,9 @@ export function MailAiderApp() {
 
 **Empfohlene Aktion:** Terminkalender prüfen und verfügbaren Termin mitteilen.`;
           break;
-          
-        case 'antworten':
+          }
+
+        case 'antworten': {
           const greeting = recipientName ? `Hallo ${recipientName}` : 'Hallo';
           response = `${greeting},
 
@@ -149,8 +150,9 @@ Ich freue mich darauf, die aktuellen Fortschritte zu besprechen und die nächste
 Beste Grüße
 James`;
           break;
-          
-        case 'übersetzen':
+          }
+
+        case 'übersetzen': {
           response = `**English Translation:**
 
 Hello James,
@@ -162,8 +164,10 @@ It would be important for us to discuss the current progress and plan the next s
 Thank you very much and best regards,
 Maria`;
           break;
+          }
           
-        case 'freierModus':
+          
+        case 'freierModus':{
           response = userPrompt ? `**Bearbeitung basierend auf Ihrer Anfrage:**
 
 ${userPrompt}
@@ -173,7 +177,7 @@ ${emailData.content}
 
 **Vorschlag:** Basierend auf Ihrer Anfrage und dem E-Mail-Inhalt empfehle ich, zeitnah zu antworten und einen konkreten Terminvorschlag zu machen.` : 'Bitte geben Sie eine spezifische Anfrage für den freien Modus ein.';
           break;
-          
+          }
         default:
           response = 'Unbekannte Aktion ausgewählt.';
       }

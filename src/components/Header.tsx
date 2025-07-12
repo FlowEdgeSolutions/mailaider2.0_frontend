@@ -17,7 +17,7 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
           <img src={mailAiderLogo} alt="MailAider Logo" className="w-10 h-10" />
           <div>
             <h1 className="text-xl font-display text-gradient-primary">MailAider AI</h1>
-            <p className="text-xs font-body text-muted-foreground">Intelligent Email Assistant</p>
+            <p className="text-xs font-body text-muted-foreground">Intelligenter E-Mail-Assistent</p>
           </div>
         </div>
         
