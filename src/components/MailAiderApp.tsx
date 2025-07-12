@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from './Header';
 import { EmailViewer } from './EmailViewer';
+import { ComposeViewer } from './ComposeViewer';
 import { ActionButtons } from './ActionButtons';
 import { ChatInterface } from './ChatInterface';
 import { SettingsModal } from './SettingsModal';
 import { StatusPopup } from './StatusPopup';
 import { Tutorial } from './Tutorial';
 import { ApiKeyInput } from './ApiKeyInput';
-import { outlookService, type OutlookEmailData } from '@/services/outlookService';
+import { outlookService, type OutlookEmailData, type OutlookComposeData } from '@/services/outlookService';
 import { aiService, type AIServiceConfig } from '@/services/aiService';
 
 interface EmailData {
@@ -16,6 +17,13 @@ interface EmailData {
   sender: string;
   content: string;
   summary: string;
+}
+
+interface ComposeData {
+  to: string[];
+  cc: string[];
+  subject: string;
+  purpose: string;
 }
 
 interface SettingsData {
@@ -33,15 +41,23 @@ export function MailAiderApp() {
     content: '',
     summary: 'Lade Zusammenfassung...'
   });
+  const [composeData, setComposeData] = useState<ComposeData>({
+    to: [],
+    cc: [],
+    subject: '',
+    purpose: ''
+  });
   
   const [currentAction, setCurrentAction] = useState('antworten');
   const [isConnected, setIsConnected] = useState(false);
+  const [isComposeMode, setIsComposeMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [chatOutput, setChatOutput] = useState('Warte auf Ausgabe...');
   const [showSummary, setShowSummary] = useState(false);
+  const [showComposeDetails, setShowComposeDetails] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   
@@ -67,7 +83,7 @@ export function MailAiderApp() {
       setShowApiKeyInput(true);
     }
 
-    // Initialize Office.js and load email data
+    // Initialize Office.js and load email/compose data
     const initializeApp = async () => {
       try {
         setIsLoading(true);
@@ -75,26 +91,57 @@ export function MailAiderApp() {
         // Initialize Office.js
         await outlookService.initializeOffice();
         
-        // Load current email data
-        const currentEmail = await outlookService.getCurrentEmailData();
-        setEmailData({
-          subject: currentEmail.subject,
-          sender: currentEmail.sender,
-          content: currentEmail.content,
-          summary: 'Klicken Sie auf "Zusammenfassung anzeigen" um eine KI-Zusammenfassung zu erhalten'
-        });
+        // Check if we're in compose mode
+        const composeMode = outlookService.isComposeMode();
+        setIsComposeMode(composeMode);
+        
+        if (composeMode) {
+          // Load compose data
+          const currentCompose = await outlookService.getComposeData();
+          setComposeData({
+            to: currentCompose.to,
+            cc: currentCompose.cc,
+            subject: currentCompose.subject,
+            purpose: 'Neue E-Mail verfassen'
+          });
+          setCurrentAction('verfassen');
+          setChatOutput('Bereit zum Verfassen einer neuen E-Mail...');
+        } else {
+          // Load current email data (read mode)
+          const currentEmail = await outlookService.getCurrentEmailData();
+          setEmailData({
+            subject: currentEmail.subject,
+            sender: currentEmail.sender,
+            content: currentEmail.content,
+            summary: 'Klicken Sie auf "Zusammenfassung anzeigen" um eine KI-Zusammenfassung zu erhalten'
+          });
+        }
         
         setIsConnected(true);
         setIsLoading(false);
       } catch (error) {
         console.error('Initialization error:', error);
-        // Fallback für Development
-        setEmailData({
-          subject: 'Projektbesprechung für nächste Woche',
-          sender: 'maria.mueller@example.com',
-          content: 'Hallo James,\n\nIch hoffe, es geht dir gut. Ich wollte mich bezüglich der Projektbesprechung für nächste Woche bei dir melden. Könnten wir einen Termin für Dienstag oder Mittwoch vereinbaren?\n\nEs wäre wichtig, dass wir die aktuellen Fortschritte besprechen und die nächsten Schritte planen. Bitte lass mich wissen, welcher Tag dir besser passt.\n\nVielen Dank und beste Grüße,\nMaria',
-          summary: 'Development Modus - echte Daten verfügbar nach Outlook Integration'
-        });
+        // Fallback für Development - simuliere compose mode basierend auf URL oder anderen Faktoren
+        const simulateCompose = window.location.search.includes('compose=true');
+        setIsComposeMode(simulateCompose);
+        
+        if (simulateCompose) {
+          setComposeData({
+            to: ['beispiel@domain.com'],
+            cc: [],
+            subject: 'Neues Projekt',
+            purpose: 'Projektplanung besprechen'
+          });
+          setCurrentAction('verfassen');
+          setChatOutput('Development Modus - Compose Mode');
+        } else {
+          setEmailData({
+            subject: 'Projektbesprechung für nächste Woche',
+            sender: 'maria.mueller@example.com',
+            content: 'Hallo James,\n\nIch hoffe, es geht dir gut. Ich wollte mich bezüglich der Projektbesprechung für nächste Woche bei dir melden. Könnten wir einen Termin für Dienstag oder Mittwoch vereinbaren?\n\nEs wäre wichtig, dass wir die aktuellen Fortschritte besprechen und die nächsten Schritte planen. Bitte lass mich wissen, welcher Tag dir besser passt.\n\nVielen Dank und beste Grüße,\nMaria',
+            summary: 'Development Modus - echte Daten verfügbar nach Outlook Integration'
+          });
+        }
         setIsConnected(true);
         setIsLoading(false);
       }
@@ -149,7 +196,7 @@ export function MailAiderApp() {
     }
 
     try {
-      let actionType: 'summarize' | 'reply' | 'translate' | 'custom';
+      let actionType: 'summarize' | 'reply' | 'translate' | 'custom' | 'compose';
       
       switch (currentAction) {
         case 'zusammenfassen':
@@ -161,6 +208,9 @@ export function MailAiderApp() {
         case 'übersetzen':
           actionType = 'translate';
           break;
+        case 'verfassen':
+          actionType = 'compose';
+          break;
         case 'freierModus':
           actionType = 'custom';
           break;
@@ -168,13 +218,24 @@ export function MailAiderApp() {
           actionType = 'custom';
       }
 
-      const result = await aiService.processEmail({
+      const requestData: any = {
         action: actionType,
-        emailContent: emailData.content,
         settings,
         customPrompt: userPrompt,
         recipientName
-      });
+      };
+
+      if (isComposeMode) {
+        requestData.composeContext = {
+          to: composeData.to,
+          subject: composeData.subject,
+          purpose: userPrompt || composeData.purpose
+        };
+      } else {
+        requestData.emailContent = emailData.content;
+      }
+
+      const result = await aiService.processEmail(requestData);
 
       if (result.success) {
         setChatOutput(result.result);
@@ -223,12 +284,17 @@ export function MailAiderApp() {
 
   const insertReply = async () => {
     try {
-      await outlookService.insertReplyText(chatOutput);
-      setStatusMessage('Antwort wurde in das Antwortformular eingefügt');
+      if (isComposeMode) {
+        await outlookService.insertComposeText(chatOutput);
+        setStatusMessage('Text wurde in die E-Mail eingefügt');
+      } else {
+        await outlookService.insertReplyText(chatOutput);
+        setStatusMessage('Antwort wurde in das Antwortformular eingefügt');
+      }
       setShowStatusPopup(true);
     } catch (error) {
-      console.error('Insert reply error:', error);
-      setStatusMessage('Fehler beim Einfügen der Antwort');
+      console.error('Insert text error:', error);
+      setStatusMessage('Fehler beim Einfügen des Textes');
       setShowStatusPopup(true);
     }
   };
@@ -254,12 +320,21 @@ Ihre Daten werden sicher verarbeitet:
           onStatusClick={showDsgvoInfo}
         />
 
-        <EmailViewer 
-          emailData={emailData}
-          showSummary={showSummary}
-          onToggleSummary={handleSummaryToggle}
-          isLoading={isLoading}
-        />
+        {isComposeMode ? (
+          <ComposeViewer 
+            composeData={composeData}
+            showDetails={showComposeDetails}
+            onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
+            isLoading={isLoading}
+          />
+        ) : (
+          <EmailViewer 
+            emailData={emailData}
+            showSummary={showSummary}
+            onToggleSummary={handleSummaryToggle}
+            isLoading={isLoading}
+          />
+        )}
 
         <ChatInterface
           output={chatOutput}
@@ -273,6 +348,7 @@ Ihre Daten werden sicher verarbeitet:
           currentAction={currentAction}
           onActionSelect={handleActionSelect}
           isConnected={isConnected}
+          isComposeMode={isComposeMode}
         />
 
         <SettingsModal 

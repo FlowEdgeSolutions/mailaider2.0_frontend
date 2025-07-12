@@ -5,8 +5,13 @@ interface AIServiceConfig {
 }
 
 interface AIRequest {
-  action: 'summarize' | 'reply' | 'translate' | 'custom';
-  emailContent: string;
+  action: 'summarize' | 'reply' | 'translate' | 'custom' | 'compose';
+  emailContent?: string;
+  composeContext?: {
+    to: string[];
+    subject: string;
+    purpose?: string;
+  };
   settings: {
     tone: string;
     greeting: string;
@@ -121,6 +126,18 @@ Aufgabe: Schreibe eine professionelle Antwort auf diese E-Mail. Beginne mit "${g
         return `${baseContext}
 
 Aufgabe: Übersetze diese E-Mail ins Englische und behalte dabei den ursprünglichen Ton und die Formatierung bei.`;
+
+      case 'compose':
+        const recipients = request.composeContext?.to?.join(', ') || 'den Empfänger';
+        const subject = request.composeContext?.subject || 'das angegebene Thema';
+        const purpose = request.customPrompt || 'eine professionelle E-Mail';
+        return `${baseContext}
+
+Empfänger: ${recipients}
+Betreff: ${subject}
+Zweck: ${purpose}
+
+Aufgabe: Verfasse eine vollständige E-Mail mit angemessener Begrüßung und Schlussformel für die angegebenen Empfänger.`;
 
       case 'custom':
         return `${baseContext}

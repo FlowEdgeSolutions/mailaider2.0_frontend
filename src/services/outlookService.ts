@@ -8,15 +8,26 @@ interface OutlookEmailData {
   messageClass: string;
 }
 
+interface OutlookComposeData {
+  to: string[];
+  cc: string[];
+  subject: string;
+  body: string;
+}
+
 interface OutlookService {
   initializeOffice(): Promise<void>;
   getCurrentEmailData(): Promise<OutlookEmailData>;
+  getComposeData(): Promise<OutlookComposeData>;
+  insertComposeText(text: string, insertLocation?: 'body' | 'signature'): Promise<void>;
   insertReplyText(text: string): Promise<void>;
   isOfficeInitialized(): boolean;
+  isComposeMode(): boolean;
 }
 
 class OutlookServiceImpl implements OutlookService {
   private isInitialized = false;
+  private composeMode = false;
 
   async initializeOffice(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -31,7 +42,12 @@ class OutlookServiceImpl implements OutlookService {
       Office.onReady((info) => {
         if (info.host === Office.HostType.Outlook) {
           this.isInitialized = true;
-          console.log('Office.js initialized successfully');
+          // Detect if we're in compose mode
+          this.composeMode = Office.context.mailbox.item?.itemType === Office.MailboxEnums.ItemType.Message && 
+                            Office.context.mailbox.item?.itemClass === 'IPM.Note' &&
+                            !Office.context.mailbox.item?.itemId; // No itemId means compose mode
+          
+          console.log('Office.js initialized successfully. Compose mode:', this.composeMode);
           resolve();
         } else {
           reject(new Error('Not running in Outlook'));
@@ -80,6 +96,79 @@ class OutlookServiceImpl implements OutlookService {
     });
   }
 
+  async getComposeData(): Promise<OutlookComposeData> {
+    if (!this.isInitialized) {
+      throw new Error('Office.js not initialized');
+    }
+
+    return new Promise((resolve) => {
+      if (typeof Office === 'undefined') {
+        // Development Fallback
+        resolve({
+          to: [],
+          cc: [],
+          subject: '',
+          body: ''
+        });
+        return;
+      }
+
+      const item = Office.context.mailbox.item;
+      if (item) {
+        resolve({
+          to: item.to?.map(recipient => recipient.emailAddress) || [],
+          cc: item.cc?.map(recipient => recipient.emailAddress) || [],
+          subject: item.subject || '',
+          body: '' // Body wird separat geholt wenn nötig
+        });
+      } else {
+        resolve({
+          to: [],
+          cc: [],
+          subject: '',
+          body: ''
+        });
+      }
+    });
+  }
+
+  async insertComposeText(text: string, insertLocation: 'body' | 'signature' = 'body'): Promise<void> {
+    if (!this.isInitialized) {
+      throw new Error('Office.js not initialized');
+    }
+
+    return new Promise((resolve, reject) => {
+      if (typeof Office === 'undefined') {
+        // Development Fallback
+        console.log('Would insert compose text at', insertLocation, ':', text);
+        resolve();
+        return;
+      }
+
+      const item = Office.context.mailbox.item;
+      if (!item) {
+        reject(new Error('No compose item available'));
+        return;
+      }
+
+      if (insertLocation === 'body') {
+        item.body.setAsync(
+          `<div>${text.replace(/\n/g, '<br>')}</div>`,
+          { coercionType: Office.CoercionType.Html },
+          (result) => {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+              resolve();
+            } else {
+              reject(new Error('Failed to insert text into compose body'));
+            }
+          }
+        );
+      } else {
+        // Signature insertion logic would go here
+        resolve();
+      }
+    });
+  }
   async insertReplyText(text: string): Promise<void> {
     if (!this.isInitialized) {
       throw new Error('Office.js not initialized');
@@ -105,7 +194,11 @@ class OutlookServiceImpl implements OutlookService {
   isOfficeInitialized(): boolean {
     return this.isInitialized;
   }
+
+  isComposeMode(): boolean {
+    return this.composeMode;
+  }
 }
 
 export const outlookService = new OutlookServiceImpl();
-export type { OutlookEmailData };
+export type { OutlookEmailData, OutlookComposeData };
