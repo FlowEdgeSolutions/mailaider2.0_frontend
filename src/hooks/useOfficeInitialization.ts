@@ -38,15 +38,22 @@ export function useOfficeInitialization() {
     const initializeApp = async () => {
       try {
         setIsLoading(true);
+        console.log('🚀 Starte MailAider Initialisierung...');
         
         // Initialize Office.js
         await outlookService.initializeOffice();
         
         // Check if we're in compose mode
         const composeMode = outlookService.isComposeMode();
+        const isConnected = outlookService.isOfficeInitialized();
+        
         setIsComposeMode(composeMode);
+        setIsConnected(isConnected);
+        
+        console.log('📊 Status:', { isConnected, composeMode });
         
         if (composeMode) {
+          console.log('📝 Lade Compose-Daten...');
           // Load compose data
           const currentCompose = await outlookService.getComposeData();
           setComposeData({
@@ -55,7 +62,9 @@ export function useOfficeInitialization() {
             subject: currentCompose.subject,
             purpose: 'Neue E-Mail verfassen'
           });
+          console.log('✅ Compose-Daten geladen:', currentCompose);
         } else {
+          console.log('📧 Lade E-Mail-Daten...');
           // Load current email data (read mode)
           const currentEmail = await outlookService.getCurrentEmailData();
           setEmailData({
@@ -64,15 +73,18 @@ export function useOfficeInitialization() {
             content: currentEmail.content,
             summary: 'Klicken Sie auf "Zusammenfassung anzeigen" um eine KI-Zusammenfassung zu erhalten'
           });
+          console.log('✅ E-Mail-Daten geladen:', currentEmail);
         }
         
-        setIsConnected(true);
+        console.log('🎉 MailAider erfolgreich initialisiert!');
         setIsLoading(false);
       } catch (error) {
-        console.error('Initialization error:', error);
-        // Fallback für Development - simuliere compose mode basierend auf URL oder anderen Faktoren
+        console.error('❌ MailAider Initialisierung fehlgeschlagen:', error);
+        
+        // Enhanced fallback for development
         const simulateCompose = window.location.search.includes('compose=true');
         setIsComposeMode(simulateCompose);
+        setIsConnected(true); // Set to true so UI shows
         
         if (simulateCompose) {
           setComposeData({
@@ -89,7 +101,8 @@ export function useOfficeInitialization() {
             summary: 'Development Modus - echte Daten verfügbar nach Outlook Integration'
           });
         }
-        setIsConnected(true);
+        
+        console.log('🔧 Fallback-Daten geladen für Entwicklung');
         setIsLoading(false);
       }
     };

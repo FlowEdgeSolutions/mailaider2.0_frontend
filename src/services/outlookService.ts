@@ -30,27 +30,49 @@ class OutlookServiceImpl implements OutlookService {
   private composeMode = false;
 
   async initializeOffice(): Promise<void> {
+    console.log('🔄 Initialisiere Office.js...');
+    
     return new Promise((resolve, reject) => {
       if (typeof Office === 'undefined') {
-        // Fallback für Development ohne Office
-        console.warn('Office.js not available - running in development mode');
+        console.warn('⚠️ Office.js nicht verfügbar - Entwicklungsmodus aktiv');
+        console.log('🔧 Simuliere Office-Umgebung für Entwicklung');
         this.isInitialized = true;
+        this.composeMode = window.location.search.includes('compose=true');
+        console.log('📝 Entwicklungs-Compose-Modus:', this.composeMode);
         resolve();
         return;
       }
 
+      const timeout = setTimeout(() => {
+        console.error('❌ Office.js Timeout - Initialisierung fehlgeschlagen');
+        reject(new Error('Office initialization timeout'));
+      }, 10000);
+
       Office.onReady((info) => {
-        if (info.host === Office.HostType.Outlook) {
-          this.isInitialized = true;
-          // Detect if we're in compose mode
-          this.composeMode = Office.context.mailbox.item?.itemType === Office.MailboxEnums.ItemType.Message && 
-                            Office.context.mailbox.item?.itemClass === 'IPM.Note' &&
-                            !Office.context.mailbox.item?.itemId; // No itemId means compose mode
+        try {
+          clearTimeout(timeout);
+          console.log('✅ Office.js erfolgreich initialisiert:', {
+            host: info.host,
+            platform: info.platform,
+            version: Office.context.diagnostics?.version
+          });
           
-          console.log('Office.js initialized successfully. Compose mode:', this.composeMode);
-          resolve();
-        } else {
-          reject(new Error('Not running in Outlook'));
+          if (info.host === Office.HostType.Outlook) {
+            this.isInitialized = true;
+            // Detect if we're in compose mode
+            this.composeMode = Office.context.mailbox.item?.itemType === Office.MailboxEnums.ItemType.Message && 
+                              Office.context.mailbox.item?.itemClass === 'IPM.Note' &&
+                              !Office.context.mailbox.item?.itemId; // No itemId means compose mode
+            
+            console.log('📧 Compose-Modus erkannt:', this.composeMode);
+            resolve();
+          } else {
+            reject(new Error('Not running in Outlook'));
+          }
+        } catch (error) {
+          clearTimeout(timeout);
+          console.error('❌ Office Initialisierungsfehler:', error);
+          reject(error);
         }
       });
     });

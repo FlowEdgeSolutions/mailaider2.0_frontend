@@ -9,6 +9,7 @@ import { SettingsModal } from './SettingsModal';
 import { StatusPopup } from './StatusPopup';
 import { Tutorial } from './Tutorial';
 import { ApiKeyInput } from './ApiKeyInput';
+import { DebugInfo } from './DebugInfo';
 import { useOfficeInitialization } from '@/hooks/useOfficeInitialization';
 import { useApiKeyManagement } from '@/hooks/useApiKeyManagement';
 import { useAIProcessing } from '@/hooks/useAIProcessing';
@@ -142,6 +143,12 @@ export function MailAiderApp() {
           onToggleDarkMode={toggleDarkMode}
           isConnected={isConnected}
           onStatusClick={showDsgvoInfo}
+        />
+
+        <DebugInfo 
+          isConnected={isConnected} 
+          isComposeMode={isComposeMode} 
+          isLoading={isLoading} 
         />
 
         {isComposeMode ? (

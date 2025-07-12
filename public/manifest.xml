@@ -12,12 +12,12 @@
   
   <DisplayName DefaultValue="MailAider AI"/>
   <Description DefaultValue="Intelligenter E-Mail-Assistent powered by AI"/>
-  <IconUrl DefaultValue="https://localhost:5173/favicon.ico"/>
-  <HighResolutionIconUrl DefaultValue="https://localhost:5173/favicon.ico"/>
+  <IconUrl DefaultValue="http://localhost:5173/favicon.ico"/>
+  <HighResolutionIconUrl DefaultValue="http://localhost:5173/favicon.ico"/>
   <SupportUrl DefaultValue="https://flowedge.solutions"/>
   
   <AppDomains>
-    <AppDomain>https://localhost:5173</AppDomain>
+    <AppDomain>http://localhost:5173</AppDomain>
   </AppDomains>
   
   <Hosts>
@@ -33,7 +33,7 @@
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
-        <SourceLocation DefaultValue="https://localhost:5173"/>
+        <SourceLocation DefaultValue="http://localhost:5173"/>
         <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
@@ -109,12 +109,12 @@
     
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:5173/favicon.ico"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:5173/favicon.ico"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:5173/favicon.ico"/>
+        <bt:Image id="Icon.16x16" DefaultValue="http://localhost:5173/favicon.ico"/>
+        <bt:Image id="Icon.32x32" DefaultValue="http://localhost:5173/favicon.ico"/>
+        <bt:Image id="Icon.80x80" DefaultValue="http://localhost:5173/favicon.ico"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:5173"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="http://localhost:5173"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GroupLabel" DefaultValue="MailAider AI"/>
