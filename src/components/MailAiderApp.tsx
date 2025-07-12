@@ -145,6 +145,14 @@ export function MailAiderApp() {
           onStatusClick={showDsgvoInfo}
         />
 
+        {/* Debug ausgabe */}
+        <div className="bg-red-100 p-2 text-xs">
+          <div>isConnected: {isConnected.toString()}</div>
+          <div>isComposeMode: {isComposeMode.toString()}</div>
+          <div>isLoading: {isLoading.toString()}</div>
+          <div>emailData: {JSON.stringify(emailData, null, 2)}</div>
+        </div>
+
         <DebugInfo 
           isConnected={isConnected} 
           isComposeMode={isComposeMode} 
