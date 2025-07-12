@@ -1,0 +1,168 @@
+import React, { useState } from 'react';
+import { X, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+interface SettingsData {
+  tone: string;
+  greeting: string;
+  length: string;
+  language: string;
+}
+
+interface SettingsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentAction: string;
+  settings: SettingsData;
+  onSettingsChange: (settings: SettingsData) => void;
+  onSubmit: (userPrompt: string) => void;
+}
+
+export function SettingsModal({ isOpen, onClose, currentAction, settings, onSettingsChange, onSubmit }: SettingsModalProps) {
+  const [userPrompt, setUserPrompt] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    onSubmit(userPrompt);
+    setUserPrompt('');
+  };
+
+  const updateSetting = (key: keyof SettingsData, value: string) => {
+    onSettingsChange({ ...settings, [key]: value });
+  };
+
+  const getActionTitle = () => {
+    switch (currentAction) {
+      case 'zusammenfassen': return 'E-Mail zusammenfassen';
+      case 'antworten': return 'Antwort formulieren';
+      case 'übersetzen': return 'E-Mail übersetzen';
+      case 'freierModus': return 'Freier Modus';
+      default: return 'Einstellungen';
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
+                <Settings className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-foreground">{getActionTitle()}</h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-200"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {/* Settings for different actions */}
+          {currentAction === 'antworten' && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Tonfall:</label>
+                <Select value={settings.tone} onValueChange={(value) => updateSetting('tone', value)}>
+                  <SelectTrigger className="input-modern">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="formell">Formell</SelectItem>
+                    <SelectItem value="informell">Informell</SelectItem>
+                    <SelectItem value="höflich">Höflich</SelectItem>
+                    <SelectItem value="direkt">Direkt & prägnant</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Anrede:</label>
+                <Select value={settings.greeting} onValueChange={(value) => updateSetting('greeting', value)}>
+                  <SelectTrigger className="input-modern">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="informell">Du (informell)</SelectItem>
+                    <SelectItem value="formell">Sie (formell)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Länge:</label>
+                <Select value={settings.length} onValueChange={(value) => updateSetting('length', value)}>
+                  <SelectTrigger className="input-modern">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="kurz">Kurz</SelectItem>
+                    <SelectItem value="mittel">Mittel</SelectItem>
+                    <SelectItem value="lang">Lang</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          {currentAction === 'übersetzen' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Zielsprache:</label>
+              <Select value={settings.language} onValueChange={(value) => updateSetting('language', value)}>
+                <SelectTrigger className="input-modern">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="deutsch">Deutsch</SelectItem>
+                  <SelectItem value="englisch">Englisch</SelectItem>
+                  <SelectItem value="französisch">Französisch</SelectItem>
+                  <SelectItem value="italienisch">Italienisch</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* User prompt input */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              {currentAction === 'freierModus' ? 'Ihre Anfrage:' : 'Zusätzliche Anweisungen (optional):'}
+            </label>
+            <Textarea
+              value={userPrompt}
+              onChange={(e) => setUserPrompt(e.target.value)}
+              placeholder={
+                currentAction === 'freierModus' 
+                  ? 'Beschreiben Sie, was Sie mit der E-Mail machen möchten...'
+                  : 'Spezielle Wünsche oder Anpassungen...'
+              }
+              className="input-modern min-h-[100px] resize-none"
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="flex-1"
+            >
+              Abbrechen
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="flex-1 btn-primary"
+            >
+              Ausführen
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
