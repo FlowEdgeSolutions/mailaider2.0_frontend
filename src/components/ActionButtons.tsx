@@ -37,7 +37,7 @@ const actions = [
 export function ActionButtons({ currentAction, onActionSelect, isConnected }: ActionButtonsProps) {
   return (
     <div className="card-modern p-4 animate-bounce-in">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex gap-2 justify-between">
         {actions.map((action) => {
           const Icon = action.icon;
           const isActive = currentAction === action.id;
@@ -48,20 +48,22 @@ export function ActionButtons({ currentAction, onActionSelect, isConnected }: Ac
               onClick={() => onActionSelect(action.id)}
               disabled={!isConnected}
               className={`
-                relative p-4 rounded-2xl border-2 transition-all duration-300 group
+                relative p-3 rounded-xl border-2 transition-all duration-300 group flex-1 max-w-[60px]
                 ${isActive 
                   ? 'bg-gradient-primary border-primary text-white shadow-blue' 
                   : 'bg-surface border-border hover:border-primary/30 hover:bg-accent'
                 }
                 ${!isConnected ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
               `}
-              title={action.tooltip}
             >
-              <div className="flex flex-col items-center gap-2">
-                <Icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-primary'}`} />
-                <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-foreground'}`}>
-                  {action.label}
-                </span>
+              <div className="flex justify-center">
+                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-primary'}`} />
+              </div>
+              
+              {/* Hover Tooltip */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                {action.tooltip}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground"></div>
               </div>
               
               {isActive && (
