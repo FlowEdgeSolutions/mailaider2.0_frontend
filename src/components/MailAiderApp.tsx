@@ -7,6 +7,9 @@ import { ChatInterface } from './ChatInterface';
 import { SettingsModal } from './SettingsModal';
 import { StatusPopup } from './StatusPopup';
 import { Tutorial } from './Tutorial';
+import { ApiKeyInput } from './ApiKeyInput';
+import { outlookService, type OutlookEmailData } from '@/services/outlookService';
+import { aiService, type AIServiceConfig } from '@/services/aiService';
 
 interface EmailData {
   subject: string;
@@ -40,6 +43,7 @@ export function MailAiderApp() {
   const [chatOutput, setChatOutput] = useState('Warte auf Ausgabe...');
   const [showSummary, setShowSummary] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   
   const [settings, setSettings] = useState<SettingsData>({
     tone: 'formell',
@@ -55,24 +59,43 @@ export function MailAiderApp() {
       setShowTutorial(true);
     }
 
-    // Simulate Office.js initialization
+    // Check if API key is configured
+    const savedApiKey = localStorage.getItem('mailaider-api-key');
+    if (savedApiKey) {
+      aiService.setConfig({ apiKey: savedApiKey });
+    } else {
+      setShowApiKeyInput(true);
+    }
+
+    // Initialize Office.js and load email data
     const initializeApp = async () => {
       try {
         setIsLoading(true);
         
-        // Simulate email data loading
-        setTimeout(() => {
-          setEmailData({
-            subject: 'Projektbesprechung für nächste Woche',
-            sender: 'maria.mueller@example.com',
-            content: 'Hallo James,\n\nIch hoffe, es geht dir gut. Ich wollte mich bezüglich der Projektbesprechung für nächste Woche bei dir melden. Könnten wir einen Termin für Dienstag oder Mittwoch vereinbaren?\n\nEs wäre wichtig, dass wir die aktuellen Fortschritte besprechen und die nächsten Schritte planen. Bitte lass mich wissen, welcher Tag dir besser passt.\n\nVielen Dank und beste Grüße,\nMaria',
-            summary: '• Anfrage für Projektbesprechung nächste Woche\n• Terminvorschläge: Dienstag oder Mittwoch\n• Ziel: Fortschritte besprechen und nächste Schritte planen\n• Absender wartet auf Terminbestätigung'
-          });
-          setIsConnected(true);
-          setIsLoading(false);
-        }, 2000);
+        // Initialize Office.js
+        await outlookService.initializeOffice();
+        
+        // Load current email data
+        const currentEmail = await outlookService.getCurrentEmailData();
+        setEmailData({
+          subject: currentEmail.subject,
+          sender: currentEmail.sender,
+          content: currentEmail.content,
+          summary: 'Klicken Sie auf "Zusammenfassung anzeigen" um eine KI-Zusammenfassung zu erhalten'
+        });
+        
+        setIsConnected(true);
+        setIsLoading(false);
       } catch (error) {
         console.error('Initialization error:', error);
+        // Fallback für Development
+        setEmailData({
+          subject: 'Projektbesprechung für nächste Woche',
+          sender: 'maria.mueller@example.com',
+          content: 'Hallo James,\n\nIch hoffe, es geht dir gut. Ich wollte mich bezüglich der Projektbesprechung für nächste Woche bei dir melden. Könnten wir einen Termin für Dienstag oder Mittwoch vereinbaren?\n\nEs wäre wichtig, dass wir die aktuellen Fortschritte besprechen und die nächsten Schritte planen. Bitte lass mich wissen, welcher Tag dir besser passt.\n\nVielen Dank und beste Grüße,\nMaria',
+          summary: 'Development Modus - echte Daten verfügbar nach Outlook Integration'
+        });
+        setIsConnected(true);
         setIsLoading(false);
       }
     };
@@ -105,84 +128,60 @@ export function MailAiderApp() {
     }
   };
 
+  const handleApiKeySubmit = (apiKey: string) => {
+    localStorage.setItem('mailaider-api-key', apiKey);
+    aiService.setConfig({ apiKey });
+    setShowApiKeyInput(false);
+    setStatusMessage('API Key erfolgreich konfiguriert!');
+    setShowStatusPopup(true);
+  };
+
   const handleSettingsSubmit = async (userPrompt: string, recipientName?: string) => {
     setIsSettingsOpen(false);
     setIsLoading(true);
-    setChatOutput('');
+    setChatOutput('Verarbeitung läuft...');
     
-    // Simulate realistic AI processing with stages
+    if (!aiService.isConfigured()) {
+      setChatOutput('❌ API Key nicht konfiguriert. Bitte fügen Sie Ihren API Key hinzu.');
+      setIsLoading(false);
+      setShowApiKeyInput(true);
+      return;
+    }
+
     try {
-      // Stage 1: Thinking (2 seconds)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Stage 2: Processing (3 seconds)  
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Stage 3: Generating (2 seconds)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      let response = '';
+      let actionType: 'summarize' | 'reply' | 'translate' | 'custom';
       
       switch (currentAction) {
-        case 'zusammenfassen':{
-          response = `📋 **Zusammenfassung der E-Mail:**
-
-• **Hauptthema:** Projektbesprechung für die kommende Woche
-• **Terminvorschläge:** Dienstag oder Mittwoch  
-• **Zweck:** Aktuellen Projektfortschritt besprechen und weitere Schritte planen
-• **Status:** Wartet auf Terminbestätigung von dir
-• **Priorität:** Wichtig - zeitnahe Antwort erforderlich
-
-**Empfohlene Aktion:** Terminkalender prüfen und verfügbaren Termin mitteilen.`;
+        case 'zusammenfassen':
+          actionType = 'summarize';
           break;
-          }
-
-        case 'antworten': {
-          const greeting = recipientName ? `Hallo ${recipientName}` : 'Hallo';
-          response = `${greeting},
-
-vielen Dank für deine Nachricht bezüglich der Projektbesprechung.
-
-Gerne können wir uns nächste Woche treffen. Dienstag würde mir sehr gut passen - wie wäre es mit 14:00 Uhr? Falls das nicht passt, bin ich auch am Mittwoch um 10:00 Uhr verfügbar.
-
-Ich freue mich darauf, die aktuellen Fortschritte zu besprechen und die nächsten Schritte gemeinsam zu planen.
-
-Beste Grüße
-James`;
+        case 'antworten':
+          actionType = 'reply';
           break;
-          }
-
-        case 'übersetzen': {
-          response = `**English Translation:**
-
-Hello James,
-
-I hope you are doing well. I wanted to get in touch with you regarding the project meeting for next week. Could we schedule an appointment for Tuesday or Wednesday?
-
-It would be important for us to discuss the current progress and plan the next steps. Please let me know which day suits you better.
-
-Thank you very much and best regards,
-Maria`;
+        case 'übersetzen':
+          actionType = 'translate';
           break;
-          }
-          
-          
-        case 'freierModus':{
-          response = userPrompt ? `**Bearbeitung basierend auf Ihrer Anfrage:**
-
-${userPrompt}
-
-**Kontext der E-Mail berücksichtigt:**
-${emailData.content}
-
-**Vorschlag:** Basierend auf Ihrer Anfrage und dem E-Mail-Inhalt empfehle ich, zeitnah zu antworten und einen konkreten Terminvorschlag zu machen.` : 'Bitte geben Sie eine spezifische Anfrage für den freien Modus ein.';
+        case 'freierModus':
+          actionType = 'custom';
           break;
-          }
         default:
-          response = 'Unbekannte Aktion ausgewählt.';
+          actionType = 'custom';
+      }
+
+      const result = await aiService.processEmail({
+        action: actionType,
+        emailContent: emailData.content,
+        settings,
+        customPrompt: userPrompt,
+        recipientName
+      });
+
+      if (result.success) {
+        setChatOutput(result.result);
+      } else {
+        setChatOutput(`❌ Fehler: ${result.error}`);
       }
       
-      setChatOutput(response);
       setIsLoading(false);
     } catch (error) {
       console.error('Error during processing:', error);
@@ -191,16 +190,47 @@ ${emailData.content}
     }
   };
 
+  const handleSummaryToggle = async () => {
+    if (!showSummary && !emailData.summary.includes('•')) {
+      // Generate summary if not yet generated
+      setIsLoading(true);
+      
+      try {
+        const result = await aiService.processEmail({
+          action: 'summarize',
+          emailContent: emailData.content,
+          settings
+        });
+
+        if (result.success) {
+          setEmailData(prev => ({ ...prev, summary: result.result }));
+        }
+      } catch (error) {
+        console.error('Summary generation error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    setShowSummary(!showSummary);
+  };
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(chatOutput);
     setStatusMessage('Text wurde in die Zwischenablage kopiert');
     setShowStatusPopup(true);
   };
 
-  const insertReply = () => {
-    // Simulate inserting reply into email
-    setStatusMessage('Antwort wurde in das Antwortformular eingefügt');
-    setShowStatusPopup(true);
+  const insertReply = async () => {
+    try {
+      await outlookService.insertReplyText(chatOutput);
+      setStatusMessage('Antwort wurde in das Antwortformular eingefügt');
+      setShowStatusPopup(true);
+    } catch (error) {
+      console.error('Insert reply error:', error);
+      setStatusMessage('Fehler beim Einfügen der Antwort');
+      setShowStatusPopup(true);
+    }
   };
 
   const showDsgvoInfo = () => {
@@ -227,7 +257,7 @@ Ihre Daten werden sicher verarbeitet:
         <EmailViewer 
           emailData={emailData}
           showSummary={showSummary}
-          onToggleSummary={() => setShowSummary(!showSummary)}
+          onToggleSummary={handleSummaryToggle}
           isLoading={isLoading}
         />
 
@@ -264,6 +294,12 @@ Ihre Daten werden sicher verarbeitet:
           isVisible={showTutorial}
           onComplete={handleTutorialComplete}
           onSkip={handleTutorialSkip}
+        />
+
+        <ApiKeyInput
+          isVisible={showApiKeyInput}
+          onSubmit={handleApiKeySubmit}
+          onSkip={() => setShowApiKeyInput(false)}
         />
 
         <Toaster />
