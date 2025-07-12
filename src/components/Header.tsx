@@ -1,5 +1,6 @@
 import React from 'react';
 import { Moon, Sun, Wifi, WifiOff } from 'lucide-react';
+import mailAiderLogo from '../assets/mailaider-logo.png';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -16,7 +17,7 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
           <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-blue" style={{
             background: 'linear-gradient(135deg, #007AFF 0%, #00C851 100%)'
           }}>
-            <span className="text-lg font-bold text-white">M</span>
+            <img src={mailAiderLogo} alt="MailAider Logo" className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-xl font-display text-gradient-primary">MailAider AI</h1>
