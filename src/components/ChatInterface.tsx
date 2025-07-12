@@ -66,7 +66,7 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
         )}
       </div>
 
-      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-4 min-h-[180px] max-h-[280px] overflow-hidden border border-accent/20 relative">
+      <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-4 min-h-[180px] max-h-[280px] border border-accent/20 relative">
         {isLoading || isTransitioning ? (
           <div className={`transition-all duration-500 ${isLoading ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
             <ModernLoading 
@@ -75,12 +75,12 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
             />
           </div>
         ) : (
-          <div className={`transition-all duration-700 ease-out overflow-y-auto max-h-full ${
+          <div className={`transition-all duration-700 ease-out ${
             showOutput 
               ? 'opacity-100 transform translate-y-0 scale-100' 
               : 'opacity-0 transform translate-y-4 scale-95'
           }`}>
-            <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line animate-fade-in">
+            <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line max-h-[220px] overflow-y-auto pr-2 animate-fade-in custom-scrollbar">
               {output}
             </div>
           </div>
