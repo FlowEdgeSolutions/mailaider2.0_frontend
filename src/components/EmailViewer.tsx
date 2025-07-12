@@ -24,8 +24,8 @@ export function EmailViewer({ emailData, showSummary, onToggleSummary, isLoading
           <Mail className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-semibold text-foreground mb-1 truncate">{emailData.subject}</h2>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <h2 className="text-base font-ui text-foreground mb-1 truncate">{emailData.subject}</h2>
+          <div className="flex items-center gap-2 text-xs font-body text-muted-foreground">
             <User className="w-4 h-4 flex-shrink-0" />
             <span className="truncate">{emailData.sender}</span>
           </div>
@@ -34,8 +34,8 @@ export function EmailViewer({ emailData, showSummary, onToggleSummary, isLoading
 
       {showSummary && (
         <div className="bg-accent rounded-xl p-3 border-l-4 border-primary animate-fade-in">
-          <h3 className="font-medium text-accent-foreground mb-2">Zusammenfassung:</h3>
-          <div className="text-sm text-accent-foreground/80 whitespace-pre-line">
+          <h3 className="font-ui text-accent-foreground mb-2">Zusammenfassung:</h3>
+          <div className="text-sm font-body text-accent-foreground/80 whitespace-pre-line">
             {emailData.summary}
           </div>
         </div>

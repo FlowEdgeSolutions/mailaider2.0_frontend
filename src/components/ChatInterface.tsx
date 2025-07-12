@@ -19,7 +19,7 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
         }}>
           <span className="text-sm font-bold text-white">AI</span>
         </div>
-        <h3 className="font-semibold text-foreground">KI-Assistent</h3>
+        <h3 className="font-ui text-foreground">KI-Assistent</h3>
         {isLoading && (
           <div className="ml-auto">
             <Loader2 className="w-4 h-4 animate-spin text-primary" />
@@ -32,11 +32,11 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
           <div className="flex items-center justify-center h-24">
             <div className="flex flex-col items-center gap-2">
               <div className="w-6 h-6 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-              <p className="text-sm text-muted-foreground">KI verarbeitet Ihre Anfrage...</p>
+              <p className="text-sm font-body text-muted-foreground">KI verarbeitet Ihre Anfrage...</p>
             </div>
           </div>
         ) : (
-          <div className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+          <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line">
             {output}
           </div>
         )}

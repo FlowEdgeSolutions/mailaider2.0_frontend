@@ -19,8 +19,8 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
             <span className="text-lg font-bold text-white">M</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gradient-primary">MailAider AI</h1>
-            <p className="text-xs text-muted-foreground">Intelligent Email Assistant</p>
+            <h1 className="text-xl font-display text-gradient-primary">MailAider AI</h1>
+            <p className="text-xs font-body text-muted-foreground">Intelligent Email Assistant</p>
           </div>
         </div>
         

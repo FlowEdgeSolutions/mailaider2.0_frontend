@@ -53,7 +53,7 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
               <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <Settings className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-xl font-semibold text-foreground">{getActionTitle()}</h2>
+              <h2 className="text-xl font-display text-foreground">{getActionTitle()}</h2>
             </div>
             <button
               onClick={onClose}
@@ -69,7 +69,7 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
           {currentAction === 'antworten' && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Tonfall:</label>
+                <label className="text-sm font-ui text-foreground">Tonfall:</label>
                 <Select value={settings.tone} onValueChange={(value) => updateSetting('tone', value)}>
                   <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                     <SelectValue />
@@ -84,7 +84,7 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Anrede:</label>
+                <label className="text-sm font-ui text-foreground">Anrede:</label>
                 <Select value={settings.greeting} onValueChange={(value) => updateSetting('greeting', value)}>
                   <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                     <SelectValue />
@@ -97,7 +97,7 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Länge:</label>
+                <label className="text-sm font-ui text-foreground">Länge:</label>
                 <Select value={settings.length} onValueChange={(value) => updateSetting('length', value)}>
                   <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                     <SelectValue />
@@ -114,7 +114,7 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
 
           {currentAction === 'übersetzen' && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Zielsprache:</label>
+              <label className="text-sm font-ui text-foreground">Zielsprache:</label>
               <Select value={settings.language} onValueChange={(value) => updateSetting('language', value)}>
                 <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary">
                   <SelectValue />
@@ -131,7 +131,7 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
 
           {/* User prompt input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
+            <label className="text-sm font-ui text-foreground">
               {currentAction === 'freierModus' ? 'Ihre Anfrage:' : 'Zusätzliche Anweisungen (optional):'}
             </label>
             <Textarea
