@@ -20,8 +20,7 @@ export function EmailViewer({ emailData, showSummary, onToggleSummary, isLoading
   return (
     <div className="card-modern p-4 space-y-3 animate-slide-up" data-tutorial="email-viewer">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0">
-          <Mail className="w-5 h-5 text-white" />
+        <div className="w-10 h-10 bg-gradient-primary rounded-xl flex-shrink-0">
         </div>
         <div className="flex-1 min-w-0">
           <h2 className="text-base font-ui text-foreground mb-1 truncate">{emailData.subject}</h2>
