@@ -23,8 +23,6 @@ interface SettingsModalProps {
 export function SettingsModal({ isOpen, onClose, currentAction, settings, onSettingsChange, onSubmit }: SettingsModalProps) {
   const [userPrompt, setUserPrompt] = useState('');
 
-  if (!isOpen) return null;
-
   const handleSubmit = () => {
     onSubmit(userPrompt);
     setUserPrompt('');
@@ -45,8 +43,12 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-bounce-in">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 ${
+      isOpen ? 'opacity-100 backdrop-blur-sm bg-black/50' : 'opacity-0 pointer-events-none'
+    }`}>
+      <div className={`bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transition-all duration-300 transform ${
+        isOpen ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'
+      }`}>
         <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -57,7 +59,7 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-200"
+              className="w-8 h-8 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-150 hover:scale-105"
             >
               <X className="w-4 h-4" />
             </button>

@@ -80,7 +80,10 @@ export function MailAiderApp() {
   const handleActionSelect = (action: string) => {
     setCurrentAction(action);
     if (isConnected) {
-      setIsSettingsOpen(true);
+      // Immediate response for fluid UX
+      requestAnimationFrame(() => {
+        setIsSettingsOpen(true);
+      });
     }
   };
 
