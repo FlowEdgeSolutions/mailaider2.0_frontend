@@ -48,9 +48,9 @@ export function ActionButtons({ currentAction, onActionSelect, isConnected }: Ac
               onClick={() => onActionSelect(action.id)}
               disabled={!isConnected}
               className={`
-                relative p-4 rounded-xl border-2 transition-all duration-300 group
+                relative p-4 rounded-2xl border-2 transition-all duration-300 group
                 ${isActive 
-                  ? 'bg-gradient-primary border-primary text-white shadow-purple' 
+                  ? 'bg-gradient-primary border-primary text-white shadow-blue' 
                   : 'bg-surface border-border hover:border-primary/30 hover:bg-accent'
                 }
                 ${!isConnected ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}

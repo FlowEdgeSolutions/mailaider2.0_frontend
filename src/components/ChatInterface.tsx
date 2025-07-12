@@ -14,7 +14,9 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
   return (
     <div className="card-modern p-6 space-y-4 animate-slide-up">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{
+          background: 'linear-gradient(135deg, #007AFF 0%, #00C851 100%)'
+        }}>
           <span className="text-sm font-bold text-white">AI</span>
         </div>
         <h3 className="font-semibold text-foreground">KI-Assistent</h3>

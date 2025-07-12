@@ -13,8 +13,10 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
     <div className="card-modern p-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center shadow-purple">
-            <span className="text-xl font-bold text-white">AI</span>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-blue" style={{
+            background: 'linear-gradient(135deg, #007AFF 0%, #00C851 100%)'
+          }}>
+            <span className="text-xl font-bold text-white">M</span>
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gradient-primary">MailAider AI</h1>
