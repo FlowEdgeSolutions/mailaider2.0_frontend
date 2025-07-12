@@ -87,7 +87,7 @@ export function MailAiderApp() {
     }
   };
 
-  const handleSettingsSubmit = async (userPrompt: string) => {
+  const handleSettingsSubmit = async (userPrompt: string, recipientName?: string) => {
     setIsSettingsOpen(false);
     setIsLoading(true);
     setChatOutput('');
@@ -119,7 +119,8 @@ export function MailAiderApp() {
           break;
           
         case 'antworten':
-          response = `Hallo Maria,
+          const greeting = recipientName ? `Hallo ${recipientName}` : 'Hallo';
+          response = `${greeting},
 
 vielen Dank für deine Nachricht bezüglich der Projektbesprechung.
 

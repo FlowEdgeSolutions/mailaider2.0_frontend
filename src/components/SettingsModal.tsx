@@ -17,15 +17,17 @@ interface SettingsModalProps {
   currentAction: string;
   settings: SettingsData;
   onSettingsChange: (settings: SettingsData) => void;
-  onSubmit: (userPrompt: string) => void;
+  onSubmit: (userPrompt: string, recipientName?: string) => void;
 }
 
 export function SettingsModal({ isOpen, onClose, currentAction, settings, onSettingsChange, onSubmit }: SettingsModalProps) {
   const [userPrompt, setUserPrompt] = useState('');
+  const [recipientName, setRecipientName] = useState('');
 
   const handleSubmit = () => {
-    onSubmit(userPrompt);
+    onSubmit(userPrompt, recipientName || undefined);
     setUserPrompt('');
+    setRecipientName('');
   };
 
   const updateSetting = (key: keyof SettingsData, value: string) => {
@@ -110,6 +112,17 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
                     <SelectItem value="lang" className="hover:bg-accent focus:bg-accent text-foreground">Lang</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-ui text-foreground">Name des Adressaten (optional):</label>
+                <input
+                  type="text"
+                  value={recipientName}
+                  onChange={(e) => setRecipientName(e.target.value)}
+                  placeholder="z.B. Maria, Herr Schmidt, ..."
+                  className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary w-full"
+                />
               </div>
             </div>
           )}
