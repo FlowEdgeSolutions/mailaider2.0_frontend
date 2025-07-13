@@ -1,10 +1,5 @@
 // aiService.ts – KI-Service für Azure OpenAI
 
-interface AIServiceConfig {
-  apiKey: string;
-  baseUrl?: string; // Optional, falls du flexibel mehrere Deployments nutzen möchtest
-}
-
 interface AIRequest {
   action: 'summarize' | 'reply' | 'translate' | 'custom' | 'compose';
   emailContent?: string;
@@ -30,14 +25,18 @@ interface AIResponse {
 }
 
 class AIServiceImpl {
-  private config: AIServiceConfig | null = null;
+  private apiKey: string;
 
-  setConfig(config: AIServiceConfig) {
-    this.config = config;
+  constructor() {
+    const key = import.meta.env.VITE_API_KEY;
+    if (!key) {
+      throw new Error("API Key nicht gefunden! Bitte VITE_API_KEY in .env setzen.");
+    }
+    this.apiKey = key;
   }
 
   async processEmail(request: AIRequest): Promise<AIResponse> {
-    if (!this.config?.apiKey) {
+    if (!this.apiKey) {
       return {
         success: false,
         result: '',
@@ -48,16 +47,14 @@ class AIServiceImpl {
     try {
       const prompt = this.buildPrompt(request);
 
-      // Setze hier deinen Azure-Endpunkt als Default, falls keiner per Config übergeben wird
       const endpoint =
-        this.config.baseUrl ||
         "https://openaiaddinapi.openai.azure.com/openai/deployments/gpt-4o_MailAiderAi_OutlookAddIn/chat/completions?api-version=2025-01-01-preview";
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'api-key': this.config.apiKey
+          'api-key': this.apiKey
         },
         body: JSON.stringify({
           messages: [
@@ -81,8 +78,6 @@ class AIServiceImpl {
       }
 
       const data = await response.json();
-      // Azure OpenAI response structure:
-      // { choices: [{ message: { content: "..." } }] }
       const result = data.choices?.[0]?.message?.content || 'Keine Antwort erhalten';
 
       return {
@@ -99,11 +94,9 @@ class AIServiceImpl {
     }
   }
 
-  // Übernommene Prompts aus dem alten Code, jetzt im neuen System:
   private buildPrompt(request: AIRequest): string {
     const { action, emailContent, settings, customPrompt, recipientName } = request;
 
-    // Kontext für KI zusammenbauen
     const baseContext = `
 E-Mail Inhalt:
 "${emailContent || ''}"
@@ -117,13 +110,11 @@ Einstellungen:
 
     switch (action) {
       case 'summarize':
-        // Prompt aus altem Code (Stichpunkte, Fokus auf Klarheit/Struktur)
         return `Fasse den Inhalt der folgenden E-Mail in Stichpunkten zusammen. Nutze anstatt Striche - Punkte ● für prägnante Stichpunkte. Die Zusammenfassung darf etwas ausführlicher sein, soll aber dennoch klar und strukturiert bleiben. Ziel ist es, dem Nutzer einen schnellen, aber umfassenden Überblick zu geben: Worum geht es? Welche Themen oder Anliegen werden genannt? Was sind wichtige Informationen oder nächste Schritte? 
-      
+
 ${baseContext}`;
 
       case 'reply': {
-        // Prompt aus altem Code (Antwort mit Vorgaben)
         const name = recipientName || "[Name des Absenders der ursprünglichen E-Mail]";
         return `Formuliere eine Antwort auf die folgende E-Mail im ${settings.tone} Ton mit ${settings.greeting} Anrede (${settings.length}) Sprachstil: Verwende durchgängig die Schweizer Rechtschreibung. 
 Inhaltliche Grundlage: Nutze den bereitgestellten E-Mail-Inhalt als Ausgangspunkt, ausser es wird ein separater Benutzertext angegeben, dann hat dieser Vorrang. 
@@ -138,14 +129,12 @@ ${customPrompt || ''}
       }
 
       case 'translate':
-        // Prompt aus altem Code (Ziel-Sprache ist settings.language)
         return `Übersetze den folgenden E-Mail-Inhalt vollständig und ausschließlich ins ${settings.language}:
 ${baseContext}
 ${customPrompt || ''}
 `;
 
       case 'compose': {
-        // Compose-Prompt (falls nötig anpassbar!)
         const recipients = request.composeContext?.to?.join(', ') || 'den Empfänger';
         const subject = request.composeContext?.subject || 'das angegebene Thema';
         const purpose = request.composeContext?.purpose || customPrompt || 'eine professionelle E-Mail';
@@ -162,23 +151,21 @@ ${baseContext}
       }
 
       case 'custom': {
-        // Prompt aus Freier Modus
         return `${baseContext}
 ${customPrompt || ''}
 `;
       }
 
       default:
-        // Fallback-Analyse
         return `${baseContext}
 Aufgabe: Analysiere diese E-Mail und gib hilfreiche Hinweise.`;
     }
   }
 
   isConfigured(): boolean {
-    return !!this.config?.apiKey;
+    return !!this.apiKey;
   }
 }
 
 export const aiService = new AIServiceImpl();
-export type { AIServiceConfig, AIRequest, AIResponse };
+export type { AIRequest, AIResponse };
