@@ -29,6 +29,7 @@ class AIServiceImpl {
 
   constructor() {
     const key = import.meta.env.VITE_API_KEY;
+    console.log("API Key geladen:", key); // Test-Ausgabe für den API-Key
     if (!key) {
       throw new Error("API Key nicht gefunden! Bitte VITE_API_KEY in .env setzen.");
     }
