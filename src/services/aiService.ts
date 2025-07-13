@@ -31,10 +31,12 @@ class AIServiceImpl {
     const key = import.meta.env.VITE_API_KEY;
     console.log("API Key geladen:", key); // Test-Ausgabe für den API-Key
     console.log("Build-Env VITE_API_KEY:", import.meta.env.VITE_API_KEY); // Debug-Ausgabe für Build-Umgebung
-    if (!key) {
-      throw new Error("API Key nicht gefunden! Bitte VITE_API_KEY in .env setzen.");
-    }
-    this.apiKey = key;
+    this.apiKey = key || '';
+  }
+
+  setConfig(config: { apiKey: string }) {
+    this.apiKey = config.apiKey;
+    console.log('API Key via setConfig gesetzt:', this.apiKey);
   }
 
   async processEmail(request: AIRequest): Promise<AIResponse> {
