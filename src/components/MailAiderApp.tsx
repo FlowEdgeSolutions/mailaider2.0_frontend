@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from './Header';
 import { EmailViewer } from './EmailViewer';
+import { ComposeViewer } from './ComposeViewer';
 import { ActionButtons } from './ActionButtons';
 import { ChatInterface } from './ChatInterface';
 import { SettingsModal } from './SettingsModal';
 import { StatusPopup } from './StatusPopup';
 import { Tutorial } from './Tutorial';
-
-interface EmailData {
-  subject: string;
-  sender: string;
-  content: string;
-  summary: string;
-}
+import { ApiKeyInput } from './ApiKeyInput';
+import { DebugInfo } from './DebugInfo';
+import { useOfficeInitialization } from '@/hooks/useOfficeInitialization';
+import { useApiKeyManagement } from '@/hooks/useApiKeyManagement';
+import { useAIProcessing } from '@/hooks/useAIProcessing';
+import { useTutorial } from '@/hooks/useTutorial';
+import { useAppActions } from '@/hooks/useAppActions';
 
 interface SettingsData {
   tone: string;
@@ -24,22 +25,10 @@ interface SettingsData {
 
 export function MailAiderApp() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [emailData, setEmailData] = useState<EmailData>({
-    subject: 'Lade Betreff...',
-    sender: 'Lade Absender...',
-    content: '',
-    summary: 'Lade Zusammenfassung...'
-  });
-  
   const [currentAction, setCurrentAction] = useState('antworten');
-  const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [showStatusPopup, setShowStatusPopup] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('');
-  const [chatOutput, setChatOutput] = useState('Warte auf Ausgabe...');
   const [showSummary, setShowSummary] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
+  const [showComposeDetails, setShowComposeDetails] = useState(false);
   
   const [settings, setSettings] = useState<SettingsData>({
     tone: 'formell',
@@ -48,47 +37,55 @@ export function MailAiderApp() {
     language: 'deutsch'
   });
 
-  useEffect(() => {
-    // Check if user is visiting for the first time
-    const hasSeenTutorial = localStorage.getItem('mailaider-tutorial-completed');
-    if (!hasSeenTutorial) {
-      setShowTutorial(true);
+  // Custom hooks
+  const {
+    isConnected,
+    isComposeMode,
+    isLoading: officeLoading,
+    emailData,
+    composeData,
+    setEmailData
+  } = useOfficeInitialization();
+
+  const {
+    showApiKeyInput,
+    setShowApiKeyInput,
+    handleApiKeySubmit
+  } = useApiKeyManagement();
+
+  const {
+    isLoading: aiLoading,
+    chatOutput,
+    setChatOutput,
+    processEmailWithAI,
+    generateSummary
+  } = useAIProcessing();
+
+  const {
+    showTutorial,
+    handleTutorialComplete,
+    handleTutorialSkip
+  } = useTutorial();
+
+  const {
+    showStatusPopup,
+    setShowStatusPopup,
+    statusMessage,
+    copyToClipboard,
+    insertReply,
+    showDsgvoInfo
+  } = useAppActions();
+
+  // Derived state
+  const isLoading = officeLoading || aiLoading;
+
+  // Update current action based on mode
+  React.useEffect(() => {
+    if (isComposeMode && currentAction === 'antworten') {
+      setCurrentAction('verfassen');
+      setChatOutput('Bereit zum Verfassen einer neuen E-Mail...');
     }
-
-    // Simulate Office.js initialization
-    const initializeApp = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Simulate email data loading
-        setTimeout(() => {
-          setEmailData({
-            subject: 'Projektbesprechung für nächste Woche',
-            sender: 'maria.mueller@example.com',
-            content: 'Hallo James,\n\nIch hoffe, es geht dir gut. Ich wollte mich bezüglich der Projektbesprechung für nächste Woche bei dir melden. Könnten wir einen Termin für Dienstag oder Mittwoch vereinbaren?\n\nEs wäre wichtig, dass wir die aktuellen Fortschritte besprechen und die nächsten Schritte planen. Bitte lass mich wissen, welcher Tag dir besser passt.\n\nVielen Dank und beste Grüße,\nMaria',
-            summary: '• Anfrage für Projektbesprechung nächste Woche\n• Terminvorschläge: Dienstag oder Mittwoch\n• Ziel: Fortschritte besprechen und nächste Schritte planen\n• Absender wartet auf Terminbestätigung'
-          });
-          setIsConnected(true);
-          setIsLoading(false);
-        }, 2000);
-      } catch (error) {
-        console.error('Initialization error:', error);
-        setIsLoading(false);
-      }
-    };
-
-    initializeApp();
-  }, []);
-
-  const handleTutorialComplete = () => {
-    localStorage.setItem('mailaider-tutorial-completed', 'true');
-    setShowTutorial(false);
-  };
-
-  const handleTutorialSkip = () => {
-    localStorage.setItem('mailaider-tutorial-completed', 'true');
-    setShowTutorial(false);
-  };
+  }, [isComposeMode, currentAction, setChatOutput]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -98,116 +95,44 @@ export function MailAiderApp() {
   const handleActionSelect = (action: string) => {
     setCurrentAction(action);
     if (isConnected) {
-      // Immediate response for fluid UX
       requestAnimationFrame(() => {
         setIsSettingsOpen(true);
       });
     }
   };
 
+  const handleApiKeySubmitWithStatus = (apiKey: string) => {
+    const message = handleApiKeySubmit(apiKey);
+    setShowStatusPopup(true);
+  };
+
   const handleSettingsSubmit = async (userPrompt: string, recipientName?: string) => {
     setIsSettingsOpen(false);
-    setIsLoading(true);
-    setChatOutput('');
-    
-    // Simulate realistic AI processing with stages
-    try {
-      // Stage 1: Thinking (2 seconds)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Stage 2: Processing (3 seconds)  
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Stage 3: Generating (2 seconds)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      let response = '';
-      
-      switch (currentAction) {
-        case 'zusammenfassen':
-          response = `📋 **Zusammenfassung der E-Mail:**
+    await processEmailWithAI(
+      currentAction,
+      userPrompt,
+      recipientName,
+      settings,
+      isComposeMode,
+      emailData,
+      composeData,
+      setShowApiKeyInput
+    );
+  };
 
-• **Hauptthema:** Projektbesprechung für die kommende Woche
-• **Terminvorschläge:** Dienstag oder Mittwoch  
-• **Zweck:** Aktuellen Projektfortschritt besprechen und weitere Schritte planen
-• **Status:** Wartet auf Terminbestätigung von dir
-• **Priorität:** Wichtig - zeitnahe Antwort erforderlich
-
-**Empfohlene Aktion:** Terminkalender prüfen und verfügbaren Termin mitteilen.`;
-          break;
-          
-        case 'antworten':
-          const greeting = recipientName ? `Hallo ${recipientName}` : 'Hallo';
-          response = `${greeting},
-
-vielen Dank für deine Nachricht bezüglich der Projektbesprechung.
-
-Gerne können wir uns nächste Woche treffen. Dienstag würde mir sehr gut passen - wie wäre es mit 14:00 Uhr? Falls das nicht passt, bin ich auch am Mittwoch um 10:00 Uhr verfügbar.
-
-Ich freue mich darauf, die aktuellen Fortschritte zu besprechen und die nächsten Schritte gemeinsam zu planen.
-
-Beste Grüße
-James`;
-          break;
-          
-        case 'übersetzen':
-          response = `**English Translation:**
-
-Hello James,
-
-I hope you are doing well. I wanted to get in touch with you regarding the project meeting for next week. Could we schedule an appointment for Tuesday or Wednesday?
-
-It would be important for us to discuss the current progress and plan the next steps. Please let me know which day suits you better.
-
-Thank you very much and best regards,
-Maria`;
-          break;
-          
-        case 'freierModus':
-          response = userPrompt ? `**Bearbeitung basierend auf Ihrer Anfrage:**
-
-${userPrompt}
-
-**Kontext der E-Mail berücksichtigt:**
-${emailData.content}
-
-**Vorschlag:** Basierend auf Ihrer Anfrage und dem E-Mail-Inhalt empfehle ich, zeitnah zu antworten und einen konkreten Terminvorschlag zu machen.` : 'Bitte geben Sie eine spezifische Anfrage für den freien Modus ein.';
-          break;
-          
-        default:
-          response = 'Unbekannte Aktion ausgewählt.';
-      }
-      
-      setChatOutput(response);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error during processing:', error);
-      setChatOutput('❌ Fehler bei der Verarbeitung. Bitte versuchen Sie es erneut.');
-      setIsLoading(false);
+  const handleSummaryToggle = async () => {
+    if (!showSummary && !emailData.summary.includes('•')) {
+      await generateSummary(emailData.content, settings, setEmailData);
     }
+    setShowSummary(!showSummary);
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(chatOutput);
-    setStatusMessage('Text wurde in die Zwischenablage kopiert');
-    setShowStatusPopup(true);
+  const handleCopyToClipboard = () => {
+    copyToClipboard(chatOutput);
   };
 
-  const insertReply = () => {
-    // Simulate inserting reply into email
-    setStatusMessage('Antwort wurde in das Antwortformular eingefügt');
-    setShowStatusPopup(true);
-  };
-
-  const showDsgvoInfo = () => {
-    setStatusMessage(`**DSGVO-sichere KI-Verarbeitung**
-
-Ihre Daten werden sicher verarbeitet:
-• Verschlüsselte Übertragung
-• Keine Datenspeicherung nach Verarbeitung  
-• Konform mit Schweizer Datenschutzgesetzen
-• Keine Verwendung für Training`);
-    setShowStatusPopup(true);
+  const handleInsertReply = () => {
+    insertReply(chatOutput, isComposeMode);
   };
 
   return (
@@ -220,25 +145,49 @@ Ihre Daten werden sicher verarbeitet:
           onStatusClick={showDsgvoInfo}
         />
 
-        <EmailViewer 
-          emailData={emailData}
-          showSummary={showSummary}
-          onToggleSummary={() => setShowSummary(!showSummary)}
-          isLoading={isLoading}
+        {/* Debug ausgabe */}
+        <div className="bg-red-100 p-2 text-xs">
+          <div>isConnected: {isConnected.toString()}</div>
+          <div>isComposeMode: {isComposeMode.toString()}</div>
+          <div>isLoading: {isLoading.toString()}</div>
+          <div>emailData: {JSON.stringify(emailData, null, 2)}</div>
+        </div>
+
+        <DebugInfo 
+          isConnected={isConnected} 
+          isComposeMode={isComposeMode} 
+          isLoading={isLoading} 
         />
+
+        {isComposeMode ? (
+          <ComposeViewer 
+            composeData={composeData}
+            showDetails={showComposeDetails}
+            onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
+            isLoading={isLoading}
+          />
+        ) : (
+          <EmailViewer 
+            emailData={emailData}
+            showSummary={showSummary}
+            onToggleSummary={handleSummaryToggle}
+            isLoading={isLoading}
+          />
+        )}
 
         <ChatInterface
           output={chatOutput}
           isLoading={isLoading}
           currentAction={currentAction}
-          onCopy={copyToClipboard}
-          onInsertReply={insertReply}
+          onCopy={handleCopyToClipboard}
+          onInsertReply={handleInsertReply}
         />
 
         <ActionButtons 
           currentAction={currentAction}
           onActionSelect={handleActionSelect}
           isConnected={isConnected}
+          isComposeMode={isComposeMode}
         />
 
         <SettingsModal 
@@ -260,6 +209,12 @@ Ihre Daten werden sicher verarbeitet:
           isVisible={showTutorial}
           onComplete={handleTutorialComplete}
           onSkip={handleTutorialSkip}
+        />
+
+        <ApiKeyInput
+          isVisible={showApiKeyInput}
+          onSubmit={handleApiKeySubmitWithStatus}
+          onSkip={() => setShowApiKeyInput(false)}
         />
 
         <Toaster />
