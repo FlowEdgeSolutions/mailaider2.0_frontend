@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { MessageSquare, FileText, Languages, Wand2, PenTool } from 'lucide-react';
 
 interface ActionButtonsProps {
@@ -60,28 +61,29 @@ export function ActionButtons({ currentAction, onActionSelect, isConnected, isCo
         {actions.map((action) => {
           const Icon = action.icon;
           const isActive = currentAction === action.id;
-          
+
           return (
-            <Button
-              key={action.id}
-              onClick={() => onActionSelect(action.id)}
-              disabled={!isConnected}
-              variant={isActive ? "default" : "outline"}
-              size="sm"
-              className={`
-                flex-1 p-3 h-auto flex-col gap-1 relative group transition-all duration-150
-                ${!isConnected ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
-              `}
-            >
-              <Icon className="w-4 h-4" />
-              <span className="text-xs font-medium">{action.label}</span>
-              
-              {/* Hover Tooltip */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-foreground text-background text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
-                {action.description}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground"></div>
-              </div>
-            </Button>
+            <Tooltip key={action.id}>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => onActionSelect(action.id)}
+                  disabled={!isConnected}
+                  variant={isActive ? "default" : "outline"}
+                  size="sm"
+                  className={`
+                    flex-1 p-3 h-auto flex-col gap-1 relative transition-all duration-150
+                    ${!isConnected ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
+                  `}
+                >
+                  <Icon className="w-5 h-5" />
+                  {/* KEIN sichtbarer Text mehr! */}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {action.label}
+                <div className="text-xs mt-1 text-muted-foreground">{action.description}</div>
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </div>

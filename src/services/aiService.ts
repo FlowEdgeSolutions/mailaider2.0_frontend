@@ -1,4 +1,4 @@
-// aiServices.ts – KI-Service für Azure OpenAI
+// aiService.ts – KI-Service für Azure OpenAI
 
 interface AIServiceConfig {
   apiKey: string;
@@ -99,12 +99,14 @@ class AIServiceImpl {
     }
   }
 
+  // Übernommene Prompts aus dem alten Code, jetzt im neuen System:
   private buildPrompt(request: AIRequest): string {
     const { action, emailContent, settings, customPrompt, recipientName } = request;
 
+    // Kontext für KI zusammenbauen
     const baseContext = `
 E-Mail Inhalt:
-"${emailContent}"
+"${emailContent || ''}"
 
 Einstellungen:
 - Ton: ${settings.tone}
@@ -115,47 +117,60 @@ Einstellungen:
 
     switch (action) {
       case 'summarize':
-        return `${baseContext}
-
-Aufgabe: Erstelle eine prägnante Zusammenfassung dieser E-Mail mit den wichtigsten Punkten und empfohlenen Aktionen.`;
+        // Prompt aus altem Code (Stichpunkte, Fokus auf Klarheit/Struktur)
+        return `Fasse den Inhalt der folgenden E-Mail in Stichpunkten zusammen. Nutze anstatt Striche - Punkte ● für prägnante Stichpunkte. Die Zusammenfassung darf etwas ausführlicher sein, soll aber dennoch klar und strukturiert bleiben. Ziel ist es, dem Nutzer einen schnellen, aber umfassenden Überblick zu geben: Worum geht es? Welche Themen oder Anliegen werden genannt? Was sind wichtige Informationen oder nächste Schritte? 
+      
+${baseContext}`;
 
       case 'reply': {
-        const greeting = recipientName ? `Hallo ${recipientName}` : 'Hallo';
-        return `${baseContext}
-${recipientName ? `Empfänger Name: ${recipientName}` : ''}
+        // Prompt aus altem Code (Antwort mit Vorgaben)
+        const name = recipientName || "[Name des Absenders der ursprünglichen E-Mail]";
+        return `Formuliere eine Antwort auf die folgende E-Mail im ${settings.tone} Ton mit ${settings.greeting} Anrede (${settings.length}) Sprachstil: Verwende durchgängig die Schweizer Rechtschreibung. 
+Inhaltliche Grundlage: Nutze den bereitgestellten E-Mail-Inhalt als Ausgangspunkt, ausser es wird ein separater Benutzertext angegeben, dann hat dieser Vorrang. 
+Begrüssung: Beginne die Antwort mit: „Hallo ${name}". Wenn der Name des Absenders nicht erkannt werden kann, schreibe nur: „Hallo,". 
+Grussformel: Lasse die Grussformel beim Beantworten von E-Mails aus. 
+Tonalität: Parameter wie formell/informell sowie Sie/Du werden vom Benutzer angegeben. Richte Formulierung, Ansprache und Stil konsequent nach diesen Angaben aus. 
+Formatierung: Lasse Betreff immer aus und bringe es nicht in die Antwort ein. Verzichte am Ende auf eine Grussformel.
 
-Aufgabe: Schreibe eine professionelle Antwort auf diese E-Mail. Beginne mit "${greeting}" und berücksichtige die angegebenen Einstellungen.`;
+${baseContext}
+${customPrompt || ''}
+`;
       }
 
       case 'translate':
-        return `${baseContext}
-
-Aufgabe: Übersetze diese E-Mail ins Englische und behalte dabei den ursprünglichen Ton und die Formatierung bei.`;
+        // Prompt aus altem Code (Ziel-Sprache ist settings.language)
+        return `Übersetze den folgenden E-Mail-Inhalt vollständig und ausschließlich ins ${settings.language}:
+${baseContext}
+${customPrompt || ''}
+`;
 
       case 'compose': {
+        // Compose-Prompt (falls nötig anpassbar!)
         const recipients = request.composeContext?.to?.join(', ') || 'den Empfänger';
         const subject = request.composeContext?.subject || 'das angegebene Thema';
-        const purpose = request.customPrompt || 'eine professionelle E-Mail';
-        return `${baseContext}
-
+        const purpose = request.composeContext?.purpose || customPrompt || 'eine professionelle E-Mail';
+        return `
 Empfänger: ${recipients}
 Betreff: ${subject}
 Zweck: ${purpose}
 
-Aufgabe: Verfasse eine vollständige E-Mail mit angemessener Begrüßung und Schlussformel für die angegebenen Empfänger.`;
+Schreibe eine vollständige neue E-Mail im gewünschten Stil und Ton. 
+Achte auf eine passende Begrüßung und einen sauberen Abschluss. Nutze die angegebenen Einstellungen:
+
+${baseContext}
+`;
       }
 
       case 'custom': {
+        // Prompt aus Freier Modus
         return `${baseContext}
-
-Spezielle Anfrage: ${customPrompt}
-
-Aufgabe: Bearbeite die E-Mail basierend auf der speziellen Anfrage und berücksichtige dabei die Einstellungen.`;
+${customPrompt || ''}
+`;
       }
 
       default:
+        // Fallback-Analyse
         return `${baseContext}
-
 Aufgabe: Analysiere diese E-Mail und gib hilfreiche Hinweise.`;
     }
   }
