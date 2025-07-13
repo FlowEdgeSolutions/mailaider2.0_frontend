@@ -4,7 +4,7 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/mailaider-ai/' : '/',
+  base: mode === 'production' ? '/MailAider4.0/' : '/',
   server: {
     host: "::",
     port: 8080,
