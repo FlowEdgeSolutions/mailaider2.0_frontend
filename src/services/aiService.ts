@@ -40,30 +40,42 @@ export class AIServiceImpl {
       VITE_API_VERSION,
     } = import.meta.env;
 
-    if (!VITE_API_KEY || !VITE_ENDPOINT || !VITE_DEPLOYMENT_NAME) {
-      throw new Error(
-        'Bitte .env.local prüfen: VITE_API_KEY, VITE_ENDPOINT und VITE_DEPLOYMENT_NAME müssen gesetzt sein.'
+    this.apiKey = VITE_API_KEY || '';
+    this.endpointBase = VITE_ENDPOINT || '';
+    this.deploymentName = VITE_DEPLOYMENT_NAME || '';
+    this.apiVersion = VITE_API_VERSION || '2023-05-15';
+
+    if (!this.apiKey || !this.endpointBase || !this.deploymentName) {
+      console.warn(
+        'WARN: Azure OpenAI Umgebungsvariablen nicht vollständig gesetzt!',
+        'API Key:', !!this.apiKey,
+        'Endpoint:', !!this.endpointBase,
+        'Deployment:', !!this.deploymentName
       );
     }
-
-    this.apiKey = VITE_API_KEY;
-    this.endpointBase = VITE_ENDPOINT;
-    this.deploymentName = VITE_DEPLOYMENT_NAME;
-    this.apiVersion = VITE_API_VERSION || '2023-05-15';
   }
 
-  public setConfig(config: { apiKey: string }) {
+  public setConfig(config: { 
+    apiKey: string; 
+    endpoint: string; 
+    deploymentName: string 
+  }) {
     this.apiKey = config.apiKey;
-    console.log('API Key via setConfig gesetzt:', this.apiKey);
+    this.endpointBase = config.endpoint;
+    this.deploymentName = config.deploymentName;
+    console.log('Konfiguration aktualisiert:', {
+      apiKey: this.apiKey ? '***' : 'leer',
+      endpointBase: this.endpointBase,
+      deploymentName: this.deploymentName
+    });
   }
 
   public async processEmail(request: AIRequest): Promise<AIResponse> {
-    if (!this.apiKey) {
+    if (!this.isConfigured()) {
       return {
         success: false,
         result: '',
-        error:
-          'API Key nicht konfiguriert. Bitte fügen Sie Ihren Azure OpenAI API Key hinzu.',
+        error: 'Azure OpenAI nicht konfiguriert. Bitte API-Key, Endpoint und Deployment in den Einstellungen eingeben.',
       };
     }
 
@@ -195,7 +207,7 @@ Aufgabe: Analysiere diese E-Mail und gib hilfreiche Hinweise.`;
   }
 
   public isConfigured(): boolean {
-    return !!this.apiKey;
+    return !!(this.apiKey && this.endpointBase && this.deploymentName);
   }
 }
 
