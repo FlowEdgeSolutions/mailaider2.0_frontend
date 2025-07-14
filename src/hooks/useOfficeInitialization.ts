@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 // Minimal type declarations for Office.js
 declare global {
@@ -15,7 +15,10 @@ declare global {
               displayName?: string;
             };
             body: {
-              getAsync: (coercionType: string, options?: unknown) => Promise<{
+              getAsync: (
+                coercionType: string,
+                options?: unknown
+              ) => Promise<{
                 value: string;
                 status: string;
               }>;
@@ -47,17 +50,17 @@ export function useOfficeInitialization() {
   const [isConnected, setIsConnected] = useState(false);
 
   const [emailData, setEmailData] = useState<EmailData>({
-    subject: '',
-    sender: '',
-    content: '',
-    summary: ''
+    subject: "",
+    sender: "",
+    content: "",
+    summary: "",
   });
 
   const [composeData, setComposeData] = useState<ComposeData>({
     to: [],
     cc: [],
-    subject: '',
-    purpose: ''
+    subject: "",
+    purpose: "",
   });
 
   useEffect(() => {
@@ -74,52 +77,58 @@ export function useOfficeInitialization() {
 
         if (window.Office.context.mailbox?.item) {
           const item = window.Office.context.mailbox.item;
-          
+
           // Use string literals directly for type checks
-          const composeMode = (
-            item.itemType === 'newMail' ||
-            item.itemType === 'reply' ||
-            item.itemType === 'forward'
-          );
+          const composeMode =
+            item.itemType === "newMail" ||
+            item.itemType === "reply" ||
+            item.itemType === "forward";
 
           setIsComposeMode(composeMode);
           setIsConnected(true);
 
           if (!composeMode) {
             // Read mode: Load actual email data
-            const subject = item.subject || '';
-            const sender = item.sender?.emailAddress || '';
-            const contentResult = await item.body.getAsync('text');
-            const content = contentResult.value || '';
+            const subject = item.subject || "";
+            const sender = item.sender?.emailAddress || "";
+            const content = await new Promise<string>((resolve, reject) => {
+              item.body.getAsync("text", (result) => {
+                if (result.status === "succeeded") {
+                  resolve(result.value);
+                } else {
+                  reject("Failed to get body");
+                }
+              });
+            });
 
             setEmailData({
               subject,
               sender,
               content,
-              summary: ''
+              summary: "",
             });
           } else {
             // Compose mode: Initialize with default values
-            setComposeData(prev => ({
+            setComposeData((prev) => ({
               ...prev,
-              subject: item.subject || '',
-              purpose: 'Neue E-Mail verfassen'
+              subject: item.subject || "",
+              purpose: "Neue E-Mail verfassen",
             }));
           }
         }
       } catch (error) {
-        console.error('Office initialization failed:', error);
+        console.error("Office initialization failed:", error);
         // Fallback for development outside Outlook
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === "development") {
           setIsComposeMode(false);
           setIsConnected(true);
           setEmailData({
-            subject: 'Test Email Subject',
-            sender: 'test@example.com',
-            content: 'This is a test email content for development purposes.',
-            summary: ''
+            subject: "Test Email Subject",
+            sender: "test@example.com",
+            content: "This is a test email content for development purposes.",
+            summary: "",
           });
-          console.warn('Using development fallback data');
+          console.warn("Using development fallback data");
         }
       } finally {
         setIsLoading(false);
@@ -136,6 +145,6 @@ export function useOfficeInitialization() {
     emailData,
     composeData,
     setEmailData,
-    setComposeData
+    setComposeData,
   };
 }
