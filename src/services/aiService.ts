@@ -20,8 +20,8 @@ export interface AIResponse {
 }
 
 export class AIServiceImpl {
-  private apiKey = "OwbXLLXDxVMK2ZyyrSMcVctpBct8wvAC6681PtuvZeL5U9ubTHeJQQJ99B6ACPV0roXJ3v3AAAAA6C06zz1X";  // Azure OpenAI API-Key
-  private endpoint = 'https://your-openai-endpoint.openai.azure.com';
+  private apiKey = "9psvVslPXfp4xbJ9SzRXpfx9E9lP8TLiFcC3IZgf43RLNQA9RiV4JQQJ99BFACI8hq2XJ3w3AAABACOGHQcr";  // Azure OpenAI API-Key
+  private endpoint = 'https://openaiaddinapi.openai.azure.com/openai/deployments/gpt-4o_MailAiderAi_OutlookAddIn';
   private deployment = 'gpt-4o';
   private version = '2025-01-01-preview';
 
