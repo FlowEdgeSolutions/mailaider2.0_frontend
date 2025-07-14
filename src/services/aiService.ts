@@ -20,7 +20,7 @@ export interface AIResponse {
 }
 
 export class AIServiceImpl {
-  private apiKey = '<DEIN_API_KEY>';  // Azure OpenAI API-Key
+  private apiKey = "OwbXLLXDxVMK2ZyyrSMcVctpBct8wvAC6681PtuvZeL5U9ubTHeJQQJ99B6ACPV0roXJ3v3AAAAA6C06zz1X";  // Azure OpenAI API-Key
   private endpoint = 'https://your-openai-endpoint.openai.azure.com';
   private deployment = 'gpt-4o';
   private version = '2025-01-01-preview';
