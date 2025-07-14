@@ -46,7 +46,8 @@ class OutlookServiceImpl implements OutlookService {
       if (typeof Office === 'undefined') {
         console.warn('⚠️ Office.js nicht verfügbar – Simuliere Umgebung');
         this.isInitialized = true;
-        this.composeMode = new URLSearchParams(window.location.search).get('compose') === 'true';
+        this.composeMode =
+          new URLSearchParams(window.location.search).get('compose') === 'true';
         resolve();
         return;
       }
@@ -62,6 +63,7 @@ class OutlookServiceImpl implements OutlookService {
 
         console.log('✅ Office.js initialisiert:', info);
         this.isInitialized = true;
+
         const item = Office.context.mailbox.item!;
         this.composeMode =
           item.itemType === Office.MailboxEnums.ItemType.Message &&
@@ -152,7 +154,10 @@ class OutlookServiceImpl implements OutlookService {
     };
   }
 
-  async insertComposeText(text: string, insertLocation: 'body' | 'signature' = 'body'): Promise<void> {
+  async insertComposeText(
+    text: string,
+    insertLocation: 'body' | 'signature' = 'body'
+  ): Promise<void> {
     await this.ensureInit();
 
     if (typeof Office === 'undefined') {
