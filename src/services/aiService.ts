@@ -52,7 +52,7 @@ class AIServiceImpl {
       const prompt = this.buildPrompt(request);
 
       const endpoint =
-        "https://mailaiderfse.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview";
+        "https://mailaiderfse.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-11-20-preview";
 
       const response = await fetch(endpoint, {
         method: 'POST',
