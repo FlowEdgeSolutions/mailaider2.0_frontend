@@ -14,6 +14,8 @@ import { useApiKeyManagement } from "@/hooks/useApiKeyManagement";
 import { useAIProcessing } from "@/hooks/useAIProcessing";
 import { useTutorial } from "@/hooks/useTutorial";
 import { useAppActions } from "@/hooks/useAppActions";
+import ComposeEditor from "./ComposeEditor";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SettingsData {
   tone: string;
@@ -56,8 +58,7 @@ export function MailAiderApp() {
     generateSummary,
   } = useAIProcessing();
 
-  const { showTutorial, handleTutorialComplete, handleTutorialSkip } =
-    useTutorial();
+  const { showTutorial, handleTutorialComplete, handleTutorialSkip } = useTutorial();
 
   const {
     showStatusPopup,
@@ -153,12 +154,23 @@ export function MailAiderApp() {
         />
 
         {isComposeMode ? (
-          <ComposeViewer
-            composeData={composeData}
-            showDetails={showComposeDetails}
-            onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
-            isLoading={isLoading}
-          />
+          <>
+            <ComposeViewer
+              composeData={composeData}
+              showDetails={showComposeDetails}
+              onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
+              isLoading={isLoading}
+            />
+            {/* Freier Editor bei Compose */}
+            <Card>
+              <CardHeader>
+                <CardTitle>✍️ Freier Modus – E-Mail verfassen</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ComposeEditor />
+              </CardContent>
+            </Card>
+          </>
         ) : (
           <EmailViewer
             emailData={emailData}
