@@ -1,5 +1,4 @@
 // aiService.ts – KI-Service für Azure OpenAI
-
 export interface AIRequest {
   action: 'summarize' | 'reply' | 'translate' | 'custom' | 'compose';
   emailContent?: string;
@@ -31,6 +30,9 @@ export class AIServiceImpl {
   private apiVersion: string;
 
   constructor() {
+    // Debug: prüfen, welche Env-Vars geladen sind
+    console.log('🔎 import.meta.env:', import.meta.env);
+
     const {
       VITE_API_KEY,
       VITE_ENDPOINT,
@@ -60,12 +62,14 @@ export class AIServiceImpl {
       return {
         success: false,
         result: '',
-        error: 'API Key nicht konfiguriert. Bitte fügen Sie Ihren Azure OpenAI API Key hinzu.',
+        error:
+          'API Key nicht konfiguriert. Bitte fügen Sie Ihren Azure OpenAI API Key hinzu.',
       };
     }
 
     try {
       const prompt = this.buildPrompt(request);
+
       const url =
         [
           this.endpointBase,
@@ -73,8 +77,23 @@ export class AIServiceImpl {
           'deployments',
           this.deploymentName,
           'chat/completions',
-        ].join('/') +
-        `?api-version=${this.apiVersion}`;
+        ].join('/') + `?api-version=${this.apiVersion}`;
+
+      // Debug: URL und Body prüfen
+      console.log('🌐 Azure-OpenAI-URL:', url);
+      const body = {
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Du bist ein E-Mail-Assistent. Verwende immer die Schweizer Rechtschreibung. Nutze den bereitgestellten E-Mail-Inhalt als Grundlage, sofern kein separater Benutzertext gegeben ist.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.6,
+        max_tokens: 1000,
+      };
+      console.log('📨 Request Body:', body);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -82,21 +101,7 @@ export class AIServiceImpl {
           'Content-Type': 'application/json',
           'api-key': this.apiKey,
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Du bist ein E-Mail-Assistent. Verwende immer die Schweizer Rechtschreibung. Nutze den bereitgestellten E-Mail-Inhalt als Grundlage, sofern kein separater Benutzertext gegeben ist.',
-            },
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          temperature: 0.6,
-          max_tokens: 1000,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
