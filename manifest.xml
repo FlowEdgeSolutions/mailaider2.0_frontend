@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xsi:type="MailApp">
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xsi:type="MailApp">
 
   <Id>d9326846-c221-4a8b-94da-cdf8948c397f</Id>
   <Version>1.0.0.6</Version>  <!-- Version erhöht -->
@@ -38,7 +39,6 @@
     <Form xsi:type="ItemEdit">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
-        <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
   </FormSettings>
@@ -52,7 +52,7 @@
 
   <!-- VersionOverrides korrigiert -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <Requirements>
       <bt:Sets DefaultMinVersion="1.3">
         <bt:Set Name="Mailbox"/>
