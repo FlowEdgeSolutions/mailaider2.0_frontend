@@ -2,22 +2,21 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
            xsi:type="MailApp">
 
   <Id>d9326846-c221-4a8b-94da-cdf8948c397f</Id>
-  <Version>1.0.0.3</Version>
+  <Version>1.0.0.3</Version>  <!-- Version erhöht -->
   <ProviderName>FlowEdge Solutions</ProviderName>
   <DefaultLocale>de-DE</DefaultLocale>
-
+  
   <DisplayName DefaultValue="MailAider AI 2.0"/>
   <Description DefaultValue="Intelligenter E-Mail-Assistent mit KI-Unterstützung"/>
-  <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo16.png"/>
-  <HighResolutionIconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo16.png"/>
+  <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
+  <HighResolutionIconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
   <SupportUrl DefaultValue="https://flowedge.de"/>
 
   <AppDomains>
-    <AppDomain>https://khaled-ayub.github.io/MailAider4.0/</AppDomain>
+    <AppDomain>https://khaled-ayub.github.io</AppDomain>
   </AppDomains>
 
   <Hosts>
@@ -30,15 +29,6 @@
     </Sets>
   </Requirements>
 
-  <FormSettings>
-    <Form xsi:type="ItemRead">
-      <DesktopSettings>
-        <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
-        <RequestedHeight>450</RequestedHeight>
-      </DesktopSettings>
-    </Form>
-  </FormSettings>
-
   <Permissions>ReadWriteMailbox</Permissions>
 
   <Rule xsi:type="RuleCollection" Mode="Or">
@@ -46,7 +36,9 @@
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
   </Rule>
 
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.0" xsi:type="VersionOverridesV1_0">
+  <!-- Korrektur: mailappor Namespace nur hier deklarieren -->
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" 
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <Requirements>
       <bt:Sets DefaultMinVersion="1.3">
         <bt:Set Name="Mailbox"/>
@@ -56,6 +48,7 @@
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
+          <!-- Lesemodus-Erweiterungspunkt -->
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
@@ -80,6 +73,7 @@
             </OfficeTab>
           </ExtensionPoint>
 
+          <!-- Bearbeitungsmodus-Erweiterungspunkt -->
           <ExtensionPoint xsi:type="MessageComposeCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgComposeGroup">
