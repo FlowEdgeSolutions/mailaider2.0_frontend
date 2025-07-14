@@ -5,7 +5,7 @@
            xsi:type="MailApp">
 
   <Id>d9326846-c221-4a8b-94da-cdf8948c397f</Id>
-  <Version>1.0.0.6</Version>  <!-- Version erhöht -->
+  <Version>1.0.0.6</Version>
   <ProviderName>FlowEdge Solutions</ProviderName>
   <DefaultLocale>de-DE</DefaultLocale>
 
@@ -29,7 +29,6 @@
     </Sets>
   </Requirements>
 
-  <!-- KORREKTUR: FormSettings muss VOR Permissions kommen -->
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
@@ -50,7 +49,6 @@
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
   </Rule>
 
-  <!-- VersionOverrides korrigiert -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <Requirements>
@@ -62,7 +60,6 @@
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
-          <!-- Lesemodus-Erweiterungspunkt -->
           <ExtensionPoint xsi:type="MessageReadCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgReadGroup">
@@ -86,7 +83,6 @@
             </OfficeTab>
           </ExtensionPoint>
 
-          <!-- Bearbeitungsmodus-Erweiterungspunkt -->
           <ExtensionPoint xsi:type="MessageComposeCommandSurface">
             <OfficeTab id="TabDefault">
               <Group id="msgComposeGroup">
