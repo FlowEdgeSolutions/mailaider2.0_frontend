@@ -47,6 +47,8 @@ export function useOfficeInitialization() {
 
         const Office = window.Office;
         const item = Office.context?.mailbox?.item;
+        console.log("📬 Mailbox item:", item); // ✅ Debug-Ausgabe
+
 
         if (!item) throw new Error("Kein Mail-Item gefunden");
 

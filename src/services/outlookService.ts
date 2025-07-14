@@ -44,8 +44,8 @@ class OutlookServiceImpl implements OutlookService {
 
         const item = Office.context.mailbox.item!;
         this.composeMode =
-          item?.itemType === Office.MailboxEnums.ItemType.Message &&
-          !Object.prototype.hasOwnProperty.call(item, "itemId");
+          item.itemType === Office.MailboxEnums.ItemType.Message &&
+          typeof item.body?.setAsync === "function";
 
         // ItemChanged-Handler registrieren
         Office.context.mailbox.addHandlerAsync(
