@@ -10,12 +10,11 @@
   <DisplayName DefaultValue="4.0 MailAider AI"/>
   <Description DefaultValue="Intelligenter KI-Assistent für Outlook – Analyse, Bearbeitung, Antwortvorschläge."/>
   <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo180.png"/>
+  <!-- Add high-resolution icon declaration -->
+  <HighResolutionIconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo180.png"/>
   <SupportUrl DefaultValue="https://flowedge.de/"/>
 
-  <DefaultSettings>
-    <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
-  </DefaultSettings>
-
+  <!-- Moved DefaultSettings below Requirements -->
   <Hosts>
     <Host Name="Mailbox"/>
   </Hosts>
@@ -25,6 +24,11 @@
       <Set Name="Mailbox"/>
     </Sets>
   </Requirements>
+
+  <!-- DefaultSettings now in correct position -->
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
+  </DefaultSettings>
 
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
                     xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
@@ -69,7 +73,8 @@
         <bt:Image id="icon16" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo16.png"/>
         <bt:Image id="icon32" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo32.png"/>
         <bt:Image id="icon80" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
-        <bt:Image id="icon128" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo180.png"/>
+        <!-- Fix: Use actual 128x128 icon here -->
+        <bt:Image id="icon128" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo128.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="taskpaneUrl" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
