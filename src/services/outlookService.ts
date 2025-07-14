@@ -1,4 +1,4 @@
-// Outlook Office.js Service
+// src/services/outlookService.ts
 
 interface OutlookEmailData {
   subject: string;
@@ -16,7 +16,7 @@ interface OutlookComposeData {
   body: string;
 }
 
-interface OutlookService {
+export interface OutlookService {
   initializeOffice(): Promise<void>;
   getCurrentEmailData(): Promise<OutlookEmailData>;
   getComposeData(): Promise<OutlookComposeData>;
@@ -32,7 +32,7 @@ class OutlookServiceImpl implements OutlookService {
   private composeMode = false;
   private itemChangedCallback: (() => void) | null = null;
 
-  /** 
+  /**
    * Registriert einen Callback, der bei jedem Mail-Wechsel ausgeführt wird.
    */
   public onItemChanged(callback: () => void) {
@@ -44,7 +44,7 @@ class OutlookServiceImpl implements OutlookService {
 
     return new Promise((resolve, reject) => {
       if (typeof Office === 'undefined') {
-        console.warn('⚠️ Office.js nicht verfügbar - Entwicklungsmodus aktiv');
+        console.warn('⚠️ Office.js nicht verfügbar – Simuliere Umgebung');
         this.isInitialized = true;
         const params = new URLSearchParams(window.location.search);
         this.composeMode = params.get('compose') === 'true';
@@ -53,33 +53,32 @@ class OutlookServiceImpl implements OutlookService {
       }
 
       const timeout = setTimeout(() => {
-        reject(new Error('Office initialization timeout'));
+        reject(new Error('Office.js Initialisierung Timeout'));
       }, 10000);
 
       Office.onReady((info) => {
         clearTimeout(timeout);
 
         if (info.host !== Office.HostType.Outlook) {
-          reject(new Error('Not running in Outlook'));
+          reject(new Error('Add-in läuft nicht in Outlook'));
           return;
         }
 
-        console.log('✅ Office.js erfolgreich initialisiert:', {
+        console.log('✅ Office.js initialisiert:', {
           host: info.host,
           platform: info.platform,
           version: Office.context.diagnostics?.version
         });
 
         this.isInitialized = true;
-        // Compose-Modus erkennen: in Read gibt es eine itemId, in Compose nicht
         const item = Office.context.mailbox.item!;
-        this.composeMode = !!(
+        // Compose-Modus: keine itemId im Compose-Fenster
+        this.composeMode =
           item.itemType === Office.MailboxEnums.ItemType.Message &&
-          !item.itemId
-        );
-        console.log('📧 Compose-Modus erkannt:', this.composeMode);
+          !item.itemId;
+        console.log('📧 Compose-Modus:', this.composeMode);
 
-        // ItemChanged-Handler registrieren
+        // ItemChanged-Handler registrieren (mit leerem Optionen-Objekt)
         Office.context.mailbox.addHandlerAsync(
           Office.EventType.ItemChanged,
           () => {
@@ -88,9 +87,13 @@ class OutlookServiceImpl implements OutlookService {
               this.itemChangedCallback();
             }
           },
+          {}, // AsyncContextOptions
           (asyncResult) => {
-            if (asyncResult.status !== Office.AsyncResultStatus.Succeeded) {
-              console.error('❌ Konnte ItemChanged-Handler nicht registrieren', asyncResult.error);
+            if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+              console.error(
+                '❌ ItemChanged-Handler Registrierung fehlgeschlagen',
+                asyncResult.error
+              );
             }
           }
         );
@@ -106,13 +109,13 @@ class OutlookServiceImpl implements OutlookService {
     }
 
     if (typeof Office === 'undefined') {
-      // Development Fallback
+      // Entwicklungs-Fallback
       return {
-        subject: 'Projektbesprechung für nächste Woche',
-        sender: 'maria.mueller@example.com',
-        content: 'Hallo James,\n\nIch hoffe, es geht dir gut. …',
-        itemId: 'dev-item-id',
-        conversationId: 'dev-conversation-id',
+        subject: 'Beispiel-Betreff',
+        sender: 'max.mustermann@example.com',
+        content: 'Dies ist ein simuliertes E-Mail-Inhaltsbeispiel.',
+        itemId: 'dev-item',
+        conversationId: 'dev-conv',
         messageClass: 'IPM.Note'
       };
     }
@@ -153,17 +156,20 @@ class OutlookServiceImpl implements OutlookService {
       to: item.to?.map(r => r.emailAddress) || [],
       cc: item.cc?.map(r => r.emailAddress) || [],
       subject: item.subject || '',
-      body: ''  // bei Bedarf separat holen
+      body: '' // Bei Bedarf separat holen
     };
   }
 
-  async insertComposeText(text: string, insertLocation: 'body' | 'signature' = 'body'): Promise<void> {
+  async insertComposeText(
+    text: string,
+    insertLocation: 'body' | 'signature' = 'body'
+  ): Promise<void> {
     if (!this.isInitialized) {
       throw new Error('Office.js not initialized');
     }
 
     if (typeof Office === 'undefined') {
-      console.log('Would insert compose text at', insertLocation, ':', text);
+      console.log('DEV: würde Text einfügen', insertLocation, text);
       return;
     }
 
@@ -194,7 +200,7 @@ class OutlookServiceImpl implements OutlookService {
     }
 
     if (typeof Office === 'undefined') {
-      console.log('Would insert reply text:', text);
+      console.log('DEV: würde Reply-Text einfügen', text);
       return;
     }
 
@@ -213,4 +219,3 @@ class OutlookServiceImpl implements OutlookService {
 }
 
 export const outlookService = new OutlookServiceImpl();
-export type { OutlookEmailData, OutlookComposeData, OutlookService };
