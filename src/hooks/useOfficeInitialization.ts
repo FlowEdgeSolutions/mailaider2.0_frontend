@@ -1,35 +1,5 @@
 import { useState, useEffect } from "react";
 
-// Minimal type declarations for Office.js
-declare global {
-  interface Window {
-    Office: {
-      onReady: (callback: () => void) => void;
-      context: {
-        mailbox: {
-          item: {
-            itemType: string;
-            subject: string;
-            sender: {
-              emailAddress: string;
-              displayName?: string;
-            };
-            body: {
-              getAsync: (
-                coercionType: string,
-                options?: unknown
-              ) => Promise<{
-                value: string;
-                status: string;
-              }>;
-            };
-          };
-        };
-      };
-    };
-  }
-}
-
 interface EmailData {
   subject: string;
   sender: string;
@@ -66,69 +36,95 @@ export function useOfficeInitialization() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Wait for Office.js to load
+        // Warten bis Office.js bereit ist
         await new Promise<void>((resolve) => {
-          if (window.Office?.context) {
+          if (typeof window.Office !== "undefined" && window.Office.context) {
             resolve();
           } else {
             window.Office?.onReady?.(() => resolve());
           }
         });
 
-        if (window.Office.context.mailbox?.item) {
-          const item = window.Office.context.mailbox.item;
+        const Office = window.Office;
+        const item = Office.context?.mailbox?.item;
 
-          // Use string literals directly for type checks
-          const composeMode =
-            item.itemType === "newMail" ||
-            item.itemType === "reply" ||
-            item.itemType === "forward";
+        if (!item) throw new Error("Kein Mail-Item gefunden");
 
-          setIsComposeMode(composeMode);
-          setIsConnected(true);
+        const itemType = item.itemType;
 
-          if (!composeMode) {
-            // Read mode: Load actual email data
-            const subject = item.subject || "";
-            const sender = item.sender?.emailAddress || "";
-            const content = await new Promise<string>((resolve, reject) => {
-              item.body.getAsync("text", (result) => {
-                if (result.status === "succeeded") {
-                  resolve(result.value);
+        const composeMode =
+          itemType === Office.MailboxEnums.ItemType.Message &&
+          !Object.prototype.hasOwnProperty.call(item, "itemId");
+
+        setIsComposeMode(composeMode);
+        setIsConnected(true);
+
+        if (composeMode) {
+          // Compose Mode – Empfänger und Betreff
+          const toRecipients: string[] = await new Promise((resolve) => {
+            (item.to as Office.Recipients).getAsync(
+              (res: Office.AsyncResult<Office.EmailAddressDetails[]>) => {
+                if (res.status === Office.AsyncResultStatus.Succeeded) {
+                  resolve(res.value.map((r) => r.emailAddress));
                 } else {
-                  reject("Failed to get body");
+                  resolve([]);
                 }
-              });
-            });
+              }
+            );
+          });
 
-            setEmailData({
-              subject,
-              sender,
-              content,
-              summary: "",
+          const ccRecipients: string[] = await new Promise((resolve) => {
+            (item.cc as Office.Recipients).getAsync(
+              (res: Office.AsyncResult<Office.EmailAddressDetails[]>) => {
+                if (res.status === Office.AsyncResultStatus.Succeeded) {
+                  resolve(res.value.map((r) => r.emailAddress));
+                } else {
+                  resolve([]);
+                }
+              }
+            );
+          });
+
+          setComposeData({
+            to: toRecipients,
+            cc: ccRecipients,
+            subject: item.subject || "",
+            purpose: "Neue E-Mail verfassen",
+          });
+        } else {
+          // Read Mode – Inhalt auslesen
+          const subject = item.subject || "";
+          const sender = item.sender?.emailAddress || "";
+
+          const content = await new Promise<string>((resolve, reject) => {
+            item.body.getAsync(Office.CoercionType.Text, (res) => {
+              if (res.status === Office.AsyncResultStatus.Succeeded) {
+                resolve(res.value);
+              } else {
+                reject("Konnte E-Mail-Inhalt nicht laden");
+              }
             });
-          } else {
-            // Compose mode: Initialize with default values
-            setComposeData((prev) => ({
-              ...prev,
-              subject: item.subject || "",
-              purpose: "Neue E-Mail verfassen",
-            }));
-          }
-        }
-      } catch (error) {
-        console.error("Office initialization failed:", error);
-        // Fallback for development outside Outlook
-        if (process.env.NODE_ENV === "development") {
-          setIsComposeMode(false);
-          setIsConnected(true);
+          });
+
           setEmailData({
-            subject: "Test Email Subject",
-            sender: "test@example.com",
-            content: "This is a test email content for development purposes.",
+            subject,
+            sender,
+            content,
             summary: "",
           });
-          console.warn("Using development fallback data");
+        }
+      } catch (error) {
+        console.error("Office Initialization Error:", error);
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Fallback auf Testdaten (Entwicklung)");
+          setIsComposeMode(true);
+          setIsConnected(true);
+          setComposeData({
+            to: ["dev@example.com"],
+            cc: [],
+            subject: "Test Compose Subject",
+            purpose: "Testmail schreiben",
+          });
         }
       } finally {
         setIsLoading(false);

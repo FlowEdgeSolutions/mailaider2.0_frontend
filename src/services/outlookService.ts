@@ -23,27 +23,29 @@ export interface OutlookService {
 class OutlookServiceImpl implements OutlookService {
   private isInitialized = false;
   private composeMode = false;
-  private itemChangedCallback: ((email: OutlookEmailData) => void) | null = null;
+  private itemChangedCallback: ((email: OutlookEmailData) => void) | null =
+    null;
 
   /** Initialisiert Office.js und registriert ItemChanged-Handler */
   async initializeOffice(): Promise<void> {
     if (this.isInitialized) return;
 
     await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => reject('Office.js Init Timeout'), 10000);
+      const timeout = setTimeout(() => reject("Office.js Init Timeout"), 10000);
 
-      Office.onReady(info => {
+      Office.onReady((info) => {
         clearTimeout(timeout);
 
         if (info.host !== Office.HostType.Outlook) {
-          return reject('Kein Outlook-Host');
+          return reject("Kein Outlook-Host");
         }
 
         this.isInitialized = true;
 
         const item = Office.context.mailbox.item!;
         this.composeMode =
-          item.itemType === Office.MailboxEnums.ItemType.Message && !item.itemId;
+          item?.itemType === Office.MailboxEnums.ItemType.Message &&
+          !Object.prototype.hasOwnProperty.call(item, "itemId");
 
         // ItemChanged-Handler registrieren
         Office.context.mailbox.addHandlerAsync(
@@ -79,18 +81,18 @@ class OutlookServiceImpl implements OutlookService {
 
     const item = Office.context.mailbox.item!;
     return new Promise((resolve, reject) => {
-      item.body.getAsync(Office.CoercionType.Text, result => {
+      item.body.getAsync(Office.CoercionType.Text, (result) => {
         if (result.status === Office.AsyncResultStatus.Succeeded) {
           resolve({
-            subject: item.subject || '',
-            sender: item.sender?.emailAddress || '',
-            content: result.value || '',
-            itemId: item.itemId || '',
-            conversationId: item.conversationId || '',
-            messageClass: item.itemClass || ''
+            subject: item.subject || "",
+            sender: item.sender?.emailAddress || "",
+            content: result.value || "",
+            itemId: item.itemId || "",
+            conversationId: item.conversationId || "",
+            messageClass: item.itemClass || "",
           });
         } else {
-          reject('Mail lesen fehlgeschlagen');
+          reject("Mail lesen fehlgeschlagen");
         }
       });
     });
@@ -100,21 +102,21 @@ class OutlookServiceImpl implements OutlookService {
   async insertComposeText(text: string): Promise<void> {
     if (!this.isInitialized) await this.initializeOffice();
 
-    if (typeof Office === 'undefined') {
-      console.log('🛠️ DEV: Compose-Text würde eingefügt:', text);
+    if (typeof Office === "undefined") {
+      console.log("🛠️ DEV: Compose-Text würde eingefügt:", text);
       return;
     }
 
     const item = Office.context.mailbox.item!;
     return new Promise((resolve, reject) => {
       item.body.setAsync(
-        `<div>${text.replace(/\n/g, '<br>')}</div>`,
+        `<div>${text.replace(/\n/g, "<br>")}</div>`,
         { coercionType: Office.CoercionType.Html },
-        result => {
+        (result) => {
           if (result.status === Office.AsyncResultStatus.Succeeded) {
             resolve();
           } else {
-            reject(new Error('Fehler beim Einfügen in Compose-Feld'));
+            reject(new Error("Fehler beim Einfügen in Compose-Feld"));
           }
         }
       );
