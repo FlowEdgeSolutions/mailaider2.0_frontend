@@ -8,10 +8,10 @@
 
   <!-- Grund-Metadaten -->
   <Id>e391fd03-659c-48fd-a251-46d01d020f2e</Id>
-  <Version>1.0.0.6</Version>
+  <Version>1.0.0.7</Version>
   <ProviderName>MailAider</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="MailAider AI -- 2.0 NEW"/>
+  <DisplayName DefaultValue="MailAider AI -- 3.0 NEW"/>
   <Description DefaultValue="Ein Outlook-Add-in mit dem Ziel, E-Mails mithilfe eines intelligenten KI-Assistenten zu analysieren, bearbeiten oder automatisch zu beantworten."/>
   <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
   <HighResolutionIconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
@@ -44,6 +44,7 @@
   <Permissions>ReadWriteItem</Permissions>
   <Rule xsi:type="RuleCollection" Mode="Or">
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
   </Rule>
 
   <!-- VersionOverrides V1.0 wrapper -->
