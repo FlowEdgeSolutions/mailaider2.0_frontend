@@ -24,61 +24,22 @@ export interface AIResponse {
 }
 
 export class AIServiceImpl {
-  private apiKey: string;
-  private endpointBase: string;
-  private deploymentName: string;
-  private apiVersion: string;
+  private readonly apiKey: string;
+  private readonly endpointBase: string;
+  private readonly deploymentName: string;
+  private readonly apiVersion: string;
 
   constructor() {
-    // Debug: prüfen, welche Env-Vars geladen sind
-    console.log('🔎 import.meta.env:', import.meta.env);
+    // Hartkodierte Konfigurationswerte (nur für Entwicklung)
+    this.apiKey = "OwbXLLXDxVMK2ZyyrSMcVctpBct8wvAC6681PtuvZeL5U9ubTHeJQQJ99B6ACPV0roXJ3v3AAAAA6C06zz1X";
+    this.endpointBase = "https://malladerise.openai.azure.com";
+    this.deploymentName = "gpt-4o";
+    this.apiVersion = "2025-01-01-preview";
 
-    const {
-      VITE_API_KEY,
-      VITE_ENDPOINT,
-      VITE_DEPLOYMENT_NAME,
-      VITE_API_VERSION,
-    } = import.meta.env;
-
-    this.apiKey = VITE_API_KEY || '';
-    this.endpointBase = VITE_ENDPOINT || '';
-    this.deploymentName = VITE_DEPLOYMENT_NAME || '';
-    this.apiVersion = VITE_API_VERSION || '2023-05-15';
-
-    if (!this.apiKey || !this.endpointBase || !this.deploymentName) {
-      console.warn(
-        'WARN: Azure OpenAI Umgebungsvariablen nicht vollständig gesetzt!',
-        'API Key:', !!this.apiKey,
-        'Endpoint:', !!this.endpointBase,
-        'Deployment:', !!this.deploymentName
-      );
-    }
-  }
-
-  public setConfig(config: { 
-    apiKey: string; 
-    endpoint: string; 
-    deploymentName: string 
-  }) {
-    this.apiKey = config.apiKey;
-    this.endpointBase = config.endpoint;
-    this.deploymentName = config.deploymentName;
-    console.log('Konfiguration aktualisiert:', {
-      apiKey: this.apiKey ? '***' : 'leer',
-      endpointBase: this.endpointBase,
-      deploymentName: this.deploymentName
-    });
+    console.log('Azure OpenAI Service initialisiert mit festen Werten');
   }
 
   public async processEmail(request: AIRequest): Promise<AIResponse> {
-    if (!this.isConfigured()) {
-      return {
-        success: false,
-        result: '',
-        error: 'Azure OpenAI nicht konfiguriert. Bitte API-Key, Endpoint und Deployment in den Einstellungen eingeben.',
-      };
-    }
-
     try {
       const prompt = this.buildPrompt(request);
 
@@ -91,8 +52,6 @@ export class AIServiceImpl {
           'chat/completions',
         ].join('/') + `?api-version=${this.apiVersion}`;
 
-      // Debug: URL und Body prüfen
-      console.log('🌐 Azure-OpenAI-URL:', url);
       const body = {
         messages: [
           {
@@ -105,7 +64,6 @@ export class AIServiceImpl {
         temperature: 0.6,
         max_tokens: 1000,
       };
-      console.log('📨 Request Body:', body);
 
       const response = await fetch(url, {
         method: 'POST',
@@ -118,8 +76,7 @@ export class AIServiceImpl {
 
       if (!response.ok) {
         const errBody = await response.text();
-        console.error(`OpenAI API Error ${response.status}:`, errBody);
-        throw new Error(`OpenAI API returned ${response.status}`);
+        throw new Error(`OpenAI API returned ${response.status}: ${errBody}`);
       }
 
       const data = await response.json();
@@ -140,8 +97,7 @@ export class AIServiceImpl {
   }
 
   private buildPrompt(request: AIRequest): string {
-    const { action, emailContent, settings, customPrompt, recipientName } =
-      request;
+    const { action, emailContent, settings, customPrompt, recipientName } = request;
 
     const baseContext = `
 E-Mail Inhalt:
@@ -161,14 +117,13 @@ Einstellungen:
 ${baseContext}`;
 
       case 'reply': {
-        const name =
-          recipientName || '[Name des Absenders der ursprünglichen E-Mail]';
+        const name = recipientName || '[Name des Absenders der ursprünglichen E-Mail]';
         return `Formuliere eine Antwort auf die folgende E-Mail im ${settings.tone} Ton mit ${settings.greeting} Anrede (${settings.length}) Sprachstil: Verwende durchgängig die Schweizer Rechtschreibung.
 Inhaltliche Grundlage: Nutze den bereitgestellten E-Mail-Inhalt als Ausgangspunkt, ausser es wird ein separater Benutzertext angegeben, dann hat dieser Vorrang.
-Begrüssung: Beginne die Antwort mit: „Hallo ${name}". Wenn der Name des Absenders nicht erkannt werden kann, schreibe nur: „Hallo,".
-Grussformel: Lasse die Grussformel beim Beantworten von E-Mails aus.
+Begrüßung: Beginne die Antwort mit: „Hallo ${name}". Wenn der Name des Absenders nicht erkannt werden kann, schreibe nur: „Hallo,".
+Grußformel: Lasse die Grußformel beim Beantworten von E-Mails aus.
 Tonalität: Parameter wie formell/informell sowie Sie/Du werden vom Benutzer angegeben. Richte Formulierung, Ansprache und Stil konsequent nach diesen Angaben aus.
-Formatierung: Lasse Betreff immer aus und bringe es nicht in die Antwort ein. Verzichte am Ende auf eine Grussformel.
+Formatierung: Lasse Betreff immer aus und bringe es nicht in die Antwort ein. Verzichte am Ende auf eine Grußformel.
 
 ${baseContext}
 ${customPrompt || ''}`;
@@ -180,11 +135,9 @@ ${baseContext}
 ${customPrompt || ''}`;
 
       case 'compose': {
-        const recipients =
-          request.composeContext?.to.join(', ') || 'den Empfänger';
+        const recipients = request.composeContext?.to.join(', ') || 'den Empfänger';
         const subject = request.composeContext?.subject || 'das angegebene Thema';
-        const purpose =
-          request.composeContext?.purpose || customPrompt || 'eine professionelle E-Mail';
+        const purpose = request.composeContext?.purpose || customPrompt || 'eine professionelle E-Mail';
         return `
 Empfänger: ${recipients}
 Betreff: ${subject}
@@ -204,10 +157,6 @@ ${customPrompt || ''}`;
         return `${baseContext}
 Aufgabe: Analysiere diese E-Mail und gib hilfreiche Hinweise.`;
     }
-  }
-
-  public isConfigured(): boolean {
-    return !!(this.apiKey && this.endpointBase && this.deploymentName);
   }
 }
 
