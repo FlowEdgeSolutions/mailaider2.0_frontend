@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "./Header";
 import { EmailViewer } from "./EmailViewer";
@@ -38,7 +38,6 @@ export function MailAiderApp() {
     language: "deutsch",
   });
 
-  // Custom hooks
   const {
     isConnected,
     isComposeMode,
@@ -69,11 +68,10 @@ export function MailAiderApp() {
     showDsgvoInfo,
   } = useAppActions();
 
-  // Derived state
   const isLoading = officeLoading || aiLoading;
 
-  // Update current action based on mode
-  React.useEffect(() => {
+  // Automatischer Wechsel zu "verfassen" im Compose-Modus
+  useEffect(() => {
     if (isComposeMode && currentAction === "antworten") {
       setCurrentAction("verfassen");
       setChatOutput("Bereit zum Verfassen einer neuen E-Mail...");
@@ -87,7 +85,7 @@ export function MailAiderApp() {
 
   const handleActionSelect = (action: string) => {
     setCurrentAction(action);
-    if (isConnected) {
+    if (isConnected && action !== "verfassen") {
       requestAnimationFrame(() => {
         setIsSettingsOpen(true);
       });
@@ -161,15 +159,16 @@ export function MailAiderApp() {
               onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
               isLoading={isLoading}
             />
-            {/* Freier Editor bei Compose */}
-            <Card>
-              <CardHeader>
-                <CardTitle>✍️ Freier Modus – E-Mail verfassen</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ComposeEditor />
-              </CardContent>
-            </Card>
+            {currentAction === "verfassen" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>✍️ Freier Modus – E-Mail verfassen</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ComposeEditor />
+                </CardContent>
+              </Card>
+            )}
           </>
         ) : (
           <EmailViewer
@@ -180,13 +179,15 @@ export function MailAiderApp() {
           />
         )}
 
-        <ChatInterface
-          output={chatOutput}
-          isLoading={isLoading}
-          currentAction={currentAction}
-          onCopy={handleCopyToClipboard}
-          onInsertReply={handleInsertReply}
-        />
+        {currentAction !== "verfassen" && (
+          <ChatInterface
+            output={chatOutput}
+            isLoading={isLoading}
+            currentAction={currentAction}
+            onCopy={handleCopyToClipboard}
+            onInsertReply={handleInsertReply}
+          />
+        )}
 
         <ActionButtons
           currentAction={currentAction}
