@@ -15,22 +15,23 @@ export interface AIRequest {
 export interface AIResponse {
   success: boolean;
   result: string;
+  /** Full raw response returned for debugging */
+  raw?: unknown;
   error?: string;
 }
 
 export class AIServiceImpl {
-  // ⬇︎ 1.  IDENTISCHE Werte wie im alten HTML
-  private apiKey    = "9psvVslPXfp4xbJ9SzRXpfx9E9lP8TLiFcC3IZgf43RLNQA9RiV4JQQJ99BFACI8hq2XJ3w3AAABACOGHQcr";
-  private endpoint  = "https://openaiaddinapi.openai.azure.com";
+  // IDENTISCHE Werte wie im alten HTML
+  private apiKey =
+    "9psvVslPXfp4xbJ9SzRXpfx9E9lP8TLiFcC3IZgf43RLNQA9RiV4JQQJ99BFACI8hq2XJ3w3AAABACOGHQcr";
+  private endpoint = "https://openaiaddinapi.openai.azure.com";
   private deployment = "gpt-4o_MailAiderAi_OutlookAddIn";
-  private version    = "2025-01-01-preview";
+  private version = "2025-01-01-preview";
 
   /** Führt die API‑Anfrage aus */
   async processEmail(request: AIRequest): Promise<AIResponse> {
     try {
       const prompt = this.buildPrompt(request);
-
-      // ⬇︎ 2.  URL baut jetzt exakt dieselbe Struktur
       const url = `${this.endpoint}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.version}`;
 
       const res = await fetch(url, {
@@ -44,7 +45,7 @@ export class AIServiceImpl {
             {
               role: "system",
               content:
-                "Du bist ein E‑Mail‑Assistent. Verwende immer die Schweizer Rechtschreibung. Nutze den bereitgestellten E‑Mail‑Inhalt als Grundlage, sofern kein separater Benutzertext gegeben ist.",
+                "Du bist ein E-Mail-Assistent. Verwende immer die Schweizer Rechtschreibung. Nutze den bereitgestellten E-Mail-Inhalt als Grundlage, sofern kein separater Benutzertext gegeben ist.",
             },
             { role: "user", content: prompt },
           ],
@@ -59,9 +60,13 @@ export class AIServiceImpl {
       }
 
       const data = await res.json();
+      // Vollständige Antwort im Dev-Tools-Log ausgeben
+      console.log("🔎 OpenAI Response", data);
+
       return {
         success: true,
-        result: data.choices[0].message.content.trim(),
+        result: data.choices?.[0]?.message?.content?.trim() ?? "",
+        raw: data,
       };
     } catch (e: unknown) {
       const err = e instanceof Error ? e : new Error(String(e));
