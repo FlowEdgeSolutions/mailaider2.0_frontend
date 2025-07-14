@@ -37,7 +37,10 @@ class OutlookServiceImpl implements OutlookService {
         console.warn('⚠️ Office.js nicht verfügbar - Entwicklungsmodus aktiv');
         console.log('🔧 Simuliere Office-Umgebung für Entwicklung');
         this.isInitialized = true;
-        this.composeMode = window.location.search.includes('compose=true');
+        //this.composeMode = window.location.search.includes('compose=true');
+        const params = new URLSearchParams(window.location.search);
+        this.composeMode = params.get('compose') === 'true';
+
         console.log('📝 Entwicklungs-Compose-Modus:', this.composeMode);
         resolve();
         return;
