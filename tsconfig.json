@@ -9,11 +9,15 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "noImplicitAny": false,
-    "noUnusedParameters": false,
+    "types": ["@microsoft/office-js"],  // Geändert von "microsoft-office-js" zur korrekten Package-Bezeichnung
     "skipLibCheck": true,
     "allowJs": true,
-    "noUnusedLocals": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "moduleResolution": "node",        // Wichtig für Package-Auflösung
+    "esModuleInterop": true,           // Ermöglicht bessere Interoperabilität
+    "typeRoots": [                     // Explizite Typ-Pfade
+      "./node_modules/@types",
+      "./node_modules/@microsoft"
+    ]
   }
 }

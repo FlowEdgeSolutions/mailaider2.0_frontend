@@ -1,4 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// Minimal type declarations for Office.js
+declare global {
+  interface Window {
+    Office: {
+      onReady: (callback: () => void) => void;
+      context: {
+        mailbox: {
+          item: {
+            itemType: string;
+            subject: string;
+            sender: {
+              emailAddress: string;
+              displayName?: string;
+            };
+            body: {
+              getAsync: (coercionType: string, options?: unknown) => Promise<{
+                value: string;
+                status: string;
+              }>;
+            };
+          };
+        };
+      };
+    };
+  }
+}
 
 interface EmailData {
   subject: string;
@@ -15,14 +42,14 @@ interface ComposeData {
 }
 
 export function useOfficeInitialization() {
-  // Check URL for compose mode
-  const urlParams = new URLSearchParams(window.location.search);
-  const isComposeMode = urlParams.get('compose') === 'true';
-  
+  const [isComposeMode, setIsComposeMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
+
   const [emailData, setEmailData] = useState<EmailData>({
-    subject: 'Projektbesprechung für nächste Woche',
-    sender: 'maria.mueller@example.com',
-    content: 'Hallo James,\n\nIch hoffe, es geht dir gut. Ich wollte mich bezüglich der Projektbesprechung für nächste Woche bei dir melden. Könnten wir einen Termin für Dienstag oder Mittwoch vereinbaren?\n\nEs wäre wichtig, dass wir die aktuellen Fortschritte besprechen und die nächsten Schritte planen. Bitte lass mich wissen, welcher Tag dir besser passt.\n\nVielen Dank und beste Grüße,\nMaria',
+    subject: '',
+    sender: '',
+    content: '',
     summary: ''
   });
 
@@ -30,13 +57,82 @@ export function useOfficeInitialization() {
     to: [],
     cc: [],
     subject: '',
-    purpose: isComposeMode ? 'Neue E-Mail verfassen' : ''
+    purpose: ''
   });
 
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        // Wait for Office.js to load
+        await new Promise<void>((resolve) => {
+          if (window.Office?.context) {
+            resolve();
+          } else {
+            window.Office?.onReady?.(() => resolve());
+          }
+        });
+
+        if (window.Office.context.mailbox?.item) {
+          const item = window.Office.context.mailbox.item;
+          
+          // Use string literals directly for type checks
+          const composeMode = (
+            item.itemType === 'newMail' ||
+            item.itemType === 'reply' ||
+            item.itemType === 'forward'
+          );
+
+          setIsComposeMode(composeMode);
+          setIsConnected(true);
+
+          if (!composeMode) {
+            // Read mode: Load actual email data
+            const subject = item.subject || '';
+            const sender = item.sender?.emailAddress || '';
+            const contentResult = await item.body.getAsync('text');
+            const content = contentResult.value || '';
+
+            setEmailData({
+              subject,
+              sender,
+              content,
+              summary: ''
+            });
+          } else {
+            // Compose mode: Initialize with default values
+            setComposeData(prev => ({
+              ...prev,
+              subject: item.subject || '',
+              purpose: 'Neue E-Mail verfassen'
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Office initialization failed:', error);
+        // Fallback for development outside Outlook
+        if (process.env.NODE_ENV === 'development') {
+          setIsComposeMode(false);
+          setIsConnected(true);
+          setEmailData({
+            subject: 'Test Email Subject',
+            sender: 'test@example.com',
+            content: 'This is a test email content for development purposes.',
+            summary: ''
+          });
+          console.warn('Using development fallback data');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initialize();
+  }, []);
+
   return {
-    isConnected: true, // Immer verbunden für Entwicklung
+    isConnected,
     isComposeMode,
-    isLoading: false,
+    isLoading,
     emailData,
     composeData,
     setEmailData,
