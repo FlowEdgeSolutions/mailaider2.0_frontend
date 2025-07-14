@@ -2,91 +2,133 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:type="MailApp">
-
   <Id>e391fd03-659c-48fd-a251-46d01d020f2e</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>FlowEdge Solutions</ProviderName>
-  <DefaultLocale>de-DE</DefaultLocale>
+  <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="4.0 MailAider AI"/>
-  <Description DefaultValue="Intelligenter KI-Assistent für Outlook – Analyse, Bearbeitung, Antwortvorschläge."/>
-  <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo180.png"/>
-  <!-- Add high-resolution icon declaration -->
-  <HighResolutionIconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo180.png"/>
+  <Description DefaultValue="Intelligent AI assistant for Outlook – Analysis, editing, and response suggestions."/>
+  <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo128.png"/>
   <SupportUrl DefaultValue="https://flowedge.de/"/>
 
-  <!-- Moved DefaultSettings below Requirements -->
   <Hosts>
     <Host Name="Mailbox"/>
   </Hosts>
 
   <Requirements>
-    <Sets DefaultMinVersion="1.1">
+    <Sets DefaultMinVersion="1.5">
       <Set Name="Mailbox"/>
     </Sets>
   </Requirements>
 
-  <!-- DefaultSettings now in correct position -->
-  <DefaultSettings>
-    <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
-  </DefaultSettings>
+  <FormSettings>
+    <Form xsi:type="ItemRead">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
+      </DesktopSettings>
+    </Form>
+    <Form xsi:type="ItemEdit">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
+      </DesktopSettings>
+    </Form>
+  </FormSettings>
 
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
-                    xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-                    Version="1.0">
+  <Permissions>ReadWriteItem</Permissions>
 
+  <Rule xsi:type="RuleCollection" Mode="Or">
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
+    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
+  </Rule>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Requirements>
-      <bt:Sets DefaultMinVersion="1.5">
-        <bt:Set Name="Mailbox"/>
-      </bt:Sets>
+      <Sets DefaultMinVersion="1.5" xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
+        <Set Name="Mailbox"/>
+      </Sets>
     </Requirements>
 
     <Hosts>
       <Host xsi:type="MailHost">
-        <ExtensionPoint xsi:type="MessageComposeCommandSurface">
-          <OfficeTab id="TabReply">
-            <Group id="msgComposeGroup">
-              <Label resid="groupLabel"/>
-              <Control xsi:type="Button" id="openTaskpaneButton">
-                <Label resid="paneButtonLabel"/>
-                <Supertip>
-                  <Title resid="paneButtonTitle"/>
-                  <Description resid="paneButtonDesc"/>
-                </Supertip>
-                <Icon>
-                  <bt:Image size="16" resid="icon16"/>
-                  <bt:Image size="32" resid="icon32"/>
-                  <bt:Image size="80" resid="icon80"/>
-                  <bt:Image size="128" resid="icon128"/>
-                </Icon>
-                <Action xsi:type="ShowTaskpane">
-                  <SourceLocation resid="taskpaneUrl"/>
-                </Action>
-              </Control>
-            </Group>
-          </OfficeTab>
-        </ExtensionPoint>
+        <DesktopFormFactor>
+          <ExtensionPoint xsi:type="MessageComposeCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="msgComposeGroup">
+                <Label resid="groupLabel"/>
+                <Control xsi:type="Button" id="openTaskpaneButton">
+                  <Label resid="paneButtonLabel"/>
+                  <Supertip>
+                    <Title resid="paneButtonTitle"/>
+                    <Description resid="paneButtonDesc"/>
+                  </Supertip>
+                  <Icon>
+                    <Image size="16" resid="icon16" xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0"/>
+                    <Image size="32" resid="icon32" xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0"/>
+                    <Image size="80" resid="icon80" xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="taskpaneUrl"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+
+          <ExtensionPoint xsi:type="MessageReadCommandSurface">
+            <OfficeTab id="TabDefault">
+              <Group id="msgReadGroup">
+                <Label resid="groupLabel"/>
+                <Control xsi:type="Button" id="openTaskpaneButtonRead">
+                  <Label resid="paneButtonLabel"/>
+                  <Supertip>
+                    <Title resid="paneButtonTitle"/>
+                    <Description resid="paneButtonDescRead"/>
+                  </Supertip>
+                  <Icon>
+                    <Image size="16" resid="icon16" xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0"/>
+                    <Image size="32" resid="icon32" xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0"/>
+                    <Image size="80" resid="icon80" xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <SourceLocation resid="taskpaneUrl"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
       </Host>
     </Hosts>
 
     <Resources>
-      <bt:Images>
-        <bt:Image id="icon16" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo16.png"/>
-        <bt:Image id="icon32" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo32.png"/>
-        <bt:Image id="icon80" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
-        <!-- Fix: Use actual 128x128 icon here -->
-        <bt:Image id="icon128" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo128.png"/>
-      </bt:Images>
-      <bt:Urls>
-        <bt:Url id="taskpaneUrl" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
-      </bt:Urls>
-      <bt:ShortStrings>
-        <bt:String id="groupLabel" DefaultValue="MailAider"/>
-        <bt:String id="paneButtonLabel" DefaultValue="KI öffnen"/>
-        <bt:String id="paneButtonTitle" DefaultValue="4.0 MailAider AI"/>
-      </bt:ShortStrings>
-      <bt:LongStrings>
-        <bt:String id="paneButtonDesc" DefaultValue="Öffnet den MailAider-KI-Assistenten zur Analyse oder Beantwortung der E-Mail."/>
-      </bt:LongStrings>
+      <Images xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
+        <Image id="icon16" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo16.png"/>
+        <Image id="icon32" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo32.png"/>
+        <Image id="icon80" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
+      </Images>
+      <Urls xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
+        <Url id="taskpaneUrl" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
+      </Urls>
+      <ShortStrings xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
+        <String id="groupLabel" DefaultValue="MailAider">
+          <Override Locale="de-DE" Value="MailAider"/>
+        </String>
+        <String id="paneButtonLabel" DefaultValue="Open AI">
+          <Override Locale="de-DE" Value="KI öffnen"/>
+        </String>
+        <String id="paneButtonTitle" DefaultValue="4.0 MailAider AI">
+          <Override Locale="de-DE" Value="4.0 MailAider AI"/>
+        </String>
+      </ShortStrings>
+      <LongStrings xmlns="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
+        <String id="paneButtonDesc" DefaultValue="Open the MailAider AI assistant to analyze or respond to emails.">
+          <Override Locale="de-DE" Value="Öffnet den MailAider-KI-Assistenten zur Analyse oder Beantwortung der E-Mail."/>
+        </String>
+        <String id="paneButtonDescRead" DefaultValue="Open the MailAider AI assistant to analyze the current email.">
+          <Override Locale="de-DE" Value="Öffnet den MailAider-KI-Assistenten zur Analyse der aktuellen E-Mail."/>
+        </String>
+      </LongStrings>
     </Resources>
   </VersionOverrides>
 </OfficeApp>
