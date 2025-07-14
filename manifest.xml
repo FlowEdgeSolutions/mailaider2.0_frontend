@@ -9,8 +9,12 @@
   <DefaultLocale>de-DE</DefaultLocale>
   <DisplayName DefaultValue="4.0 MailAider AI"/>
   <Description DefaultValue="Intelligenter KI-Assistent für Outlook – Analyse, Bearbeitung, Antwortvorschläge."/>
-  <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
+  <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo180.png"/>
   <SupportUrl DefaultValue="https://flowedge.de/"/>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
+  </DefaultSettings>
 
   <Hosts>
     <Host Name="Mailbox"/>
@@ -22,15 +26,10 @@
     </Sets>
   </Requirements>
 
-  <Permissions>ReadWriteItem</Permissions>
-
-  <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
-  </Rule>
-
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides/1.0"
                     xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
                     Version="1.0">
+
     <Requirements>
       <bt:Sets DefaultMinVersion="1.5">
         <bt:Set Name="Mailbox"/>
@@ -53,6 +52,7 @@
                   <bt:Image size="16" resid="icon16"/>
                   <bt:Image size="32" resid="icon32"/>
                   <bt:Image size="80" resid="icon80"/>
+                  <bt:Image size="128" resid="icon128"/>
                 </Icon>
                 <Action xsi:type="ShowTaskpane">
                   <SourceLocation resid="taskpaneUrl"/>
@@ -69,6 +69,7 @@
         <bt:Image id="icon16" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo16.png"/>
         <bt:Image id="icon32" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo32.png"/>
         <bt:Image id="icon80" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
+        <bt:Image id="icon128" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo180.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="taskpaneUrl" DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
