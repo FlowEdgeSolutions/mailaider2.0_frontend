@@ -1,20 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Header } from './Header';
-import { EmailViewer } from './EmailViewer';
-import { ComposeViewer } from './ComposeViewer';
-import { ActionButtons } from './ActionButtons';
-import { ChatInterface } from './ChatInterface';
-import { SettingsModal } from './SettingsModal';
-import { StatusPopup } from './StatusPopup';
-import { Tutorial } from './Tutorial';
-import { ApiKeyInput } from './ApiKeyInput';
-import { DebugInfo } from './DebugInfo';
-import { useOfficeInitialization } from '@/hooks/useOfficeInitialization';
-import { useApiKeyManagement } from '@/hooks/useApiKeyManagement';
-import { useAIProcessing } from '@/hooks/useAIProcessing';
-import { useTutorial } from '@/hooks/useTutorial';
-import { useAppActions } from '@/hooks/useAppActions';
+import { Header } from "./Header";
+import { EmailViewer } from "./EmailViewer";
+import { ComposeViewer } from "./ComposeViewer";
+import { ActionButtons } from "./ActionButtons";
+import { ChatInterface } from "./ChatInterface";
+import { SettingsModal } from "./SettingsModal";
+import { StatusPopup } from "./StatusPopup";
+import { Tutorial } from "./Tutorial";
+import { DebugInfo } from "./DebugInfo";
+import { useOfficeInitialization } from "@/hooks/useOfficeInitialization";
+import { useApiKeyManagement } from "@/hooks/useApiKeyManagement";
+import { useAIProcessing } from "@/hooks/useAIProcessing";
+import { useTutorial } from "@/hooks/useTutorial";
+import { useAppActions } from "@/hooks/useAppActions";
 
 interface SettingsData {
   tone: string;
@@ -25,16 +24,16 @@ interface SettingsData {
 
 export function MailAiderApp() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [currentAction, setCurrentAction] = useState('antworten');
+  const [currentAction, setCurrentAction] = useState("antworten");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showComposeDetails, setShowComposeDetails] = useState(false);
-  
+
   const [settings, setSettings] = useState<SettingsData>({
-    tone: 'formell',
-    greeting: 'informell',
-    length: 'kurz',
-    language: 'deutsch'
+    tone: "formell",
+    greeting: "informell",
+    length: "kurz",
+    language: "deutsch",
   });
 
   // Custom hooks
@@ -44,28 +43,21 @@ export function MailAiderApp() {
     isLoading: officeLoading,
     emailData,
     composeData,
-    setEmailData
+    setEmailData,
   } = useOfficeInitialization();
 
-  const {
-    showApiKeyInput,
-    setShowApiKeyInput,
-    handleApiKeySubmit
-  } = useApiKeyManagement();
+  useApiKeyManagement();
 
   const {
     isLoading: aiLoading,
     chatOutput,
     setChatOutput,
     processEmailWithAI,
-    generateSummary
+    generateSummary,
   } = useAIProcessing();
 
-  const {
-    showTutorial,
-    handleTutorialComplete,
-    handleTutorialSkip
-  } = useTutorial();
+  const { showTutorial, handleTutorialComplete, handleTutorialSkip } =
+    useTutorial();
 
   const {
     showStatusPopup,
@@ -73,7 +65,7 @@ export function MailAiderApp() {
     statusMessage,
     copyToClipboard,
     insertReply,
-    showDsgvoInfo
+    showDsgvoInfo,
   } = useAppActions();
 
   // Derived state
@@ -81,15 +73,15 @@ export function MailAiderApp() {
 
   // Update current action based on mode
   React.useEffect(() => {
-    if (isComposeMode && currentAction === 'antworten') {
-      setCurrentAction('verfassen');
-      setChatOutput('Bereit zum Verfassen einer neuen E-Mail...');
+    if (isComposeMode && currentAction === "antworten") {
+      setCurrentAction("verfassen");
+      setChatOutput("Bereit zum Verfassen einer neuen E-Mail...");
     }
   }, [isComposeMode, currentAction, setChatOutput]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
+    document.documentElement.classList.toggle("dark");
   };
 
   const handleActionSelect = (action: string) => {
@@ -101,12 +93,10 @@ export function MailAiderApp() {
     }
   };
 
-  const handleApiKeySubmitWithStatus = (apiKey: string) => {
-    const message = handleApiKeySubmit(apiKey);
-    setShowStatusPopup(true);
-  };
-
-  const handleSettingsSubmit = async (userPrompt: string, recipientName?: string) => {
+  const handleSettingsSubmit = async (
+    userPrompt: string,
+    recipientName?: string
+  ) => {
     setIsSettingsOpen(false);
     await processEmailWithAI(
       currentAction,
@@ -115,13 +105,12 @@ export function MailAiderApp() {
       settings,
       isComposeMode,
       emailData,
-      composeData,
-      setShowApiKeyInput
+      composeData
     );
   };
 
   const handleSummaryToggle = async () => {
-    if (!showSummary && !emailData.summary.includes('•')) {
+    if (!showSummary && !emailData.summary.includes("•")) {
       await generateSummary(emailData.content, settings, setEmailData);
     }
     setShowSummary(!showSummary);
@@ -136,9 +125,13 @@ export function MailAiderApp() {
   };
 
   return (
-    <div className={`min-h-screen bg-background-secondary transition-all duration-500 ${isDarkMode ? 'dark' : ''}`}>
+    <div
+      className={`min-h-screen bg-background-secondary transition-all duration-500 ${
+        isDarkMode ? "dark" : ""
+      }`}
+    >
       <div className="max-w-md mx-auto p-3 space-y-3">
-        <Header 
+        <Header
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
           isConnected={isConnected}
@@ -153,21 +146,21 @@ export function MailAiderApp() {
           <div>emailData: {JSON.stringify(emailData, null, 2)}</div>
         </div>
 
-        <DebugInfo 
-          isConnected={isConnected} 
-          isComposeMode={isComposeMode} 
-          isLoading={isLoading} 
+        <DebugInfo
+          isConnected={isConnected}
+          isComposeMode={isComposeMode}
+          isLoading={isLoading}
         />
 
         {isComposeMode ? (
-          <ComposeViewer 
+          <ComposeViewer
             composeData={composeData}
             showDetails={showComposeDetails}
             onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
             isLoading={isLoading}
           />
         ) : (
-          <EmailViewer 
+          <EmailViewer
             emailData={emailData}
             showSummary={showSummary}
             onToggleSummary={handleSummaryToggle}
@@ -183,14 +176,14 @@ export function MailAiderApp() {
           onInsertReply={handleInsertReply}
         />
 
-        <ActionButtons 
+        <ActionButtons
           currentAction={currentAction}
           onActionSelect={handleActionSelect}
           isConnected={isConnected}
           isComposeMode={isComposeMode}
         />
 
-        <SettingsModal 
+        <SettingsModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
           currentAction={currentAction}
@@ -199,7 +192,7 @@ export function MailAiderApp() {
           onSubmit={handleSettingsSubmit}
         />
 
-        <StatusPopup 
+        <StatusPopup
           isOpen={showStatusPopup}
           message={statusMessage}
           onClose={() => setShowStatusPopup(false)}
@@ -209,12 +202,6 @@ export function MailAiderApp() {
           isVisible={showTutorial}
           onComplete={handleTutorialComplete}
           onSkip={handleTutorialSkip}
-        />
-
-        <ApiKeyInput
-          isVisible={showApiKeyInput}
-          onSubmit={handleApiKeySubmitWithStatus}
-          onSkip={() => setShowApiKeyInput(false)}
         />
 
         <Toaster />

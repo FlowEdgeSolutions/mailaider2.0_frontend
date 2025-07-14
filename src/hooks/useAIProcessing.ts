@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { aiService } from '@/services/aiService';
+import { useState } from "react";
+import { aiService } from "@/services/aiService";
 
 interface SettingsData {
   tone: string;
@@ -22,9 +22,24 @@ interface ComposeData {
   purpose: string;
 }
 
+type ActionType = "summarize" | "reply" | "translate" | "custom" | "compose";
+
+interface AIRequestData {
+  action: ActionType;
+  settings: SettingsData;
+  customPrompt?: string;
+  recipientName?: string;
+  emailContent?: string;
+  composeContext?: {
+    to: string[];
+    subject: string;
+    purpose: string;
+  };
+}
+
 export function useAIProcessing() {
   const [isLoading, setIsLoading] = useState(false);
-  const [chatOutput, setChatOutput] = useState('Warte auf Ausgabe...');
+  const [chatOutput, setChatOutput] = useState("Warte auf Ausgabe...");
 
   const processEmailWithAI = async (
     currentAction: string,
@@ -33,54 +48,52 @@ export function useAIProcessing() {
     settings: SettingsData,
     isComposeMode: boolean,
     emailData: EmailData,
-    composeData: ComposeData,
-    setShowApiKeyInput: (show: boolean) => void
+    composeData: ComposeData
   ) => {
     setIsLoading(true);
-    setChatOutput('Verarbeitung läuft...');
-    
+    setChatOutput("Verarbeitung läuft...");
+
     if (!aiService.isConfigured()) {
-      setChatOutput('❌ API Key nicht konfiguriert. Bitte fügen Sie Ihren API Key hinzu.');
+      setChatOutput("❌ API Key nicht konfiguriert. Bitte fügen Sie Ihren API Key hinzu.");
       setIsLoading(false);
-      setShowApiKeyInput(true);
       return;
     }
 
     try {
-      let actionType: 'summarize' | 'reply' | 'translate' | 'custom' | 'compose';
-      
+      let actionType: ActionType;
+
       switch (currentAction) {
-        case 'zusammenfassen':
-          actionType = 'summarize';
+        case "zusammenfassen":
+          actionType = "summarize";
           break;
-        case 'antworten':
-          actionType = 'reply';
+        case "antworten":
+          actionType = "reply";
           break;
-        case 'übersetzen':
-          actionType = 'translate';
+        case "übersetzen":
+          actionType = "translate";
           break;
-        case 'verfassen':
-          actionType = 'compose';
+        case "verfassen":
+          actionType = "compose";
           break;
-        case 'freierModus':
-          actionType = 'custom';
+        case "freierModus":
+          actionType = "custom";
           break;
         default:
-          actionType = 'custom';
+          actionType = "custom";
       }
 
-      const requestData: any = {
+      const requestData: AIRequestData = {
         action: actionType,
         settings,
         customPrompt: userPrompt,
-        recipientName
+        recipientName,
       };
 
       if (isComposeMode) {
         requestData.composeContext = {
           to: composeData.to,
           subject: composeData.subject,
-          purpose: userPrompt || composeData.purpose
+          purpose: userPrompt || composeData.purpose,
         };
       } else {
         requestData.emailContent = emailData.content;
@@ -93,30 +106,37 @@ export function useAIProcessing() {
       } else {
         setChatOutput(`❌ Fehler: ${result.error}`);
       }
-      
-      setIsLoading(false);
+
     } catch (error) {
-      console.error('Error during processing:', error);
-      setChatOutput('❌ Fehler bei der Verarbeitung. Bitte versuchen Sie es erneut.');
+      console.error("Error during processing:", error);
+      setChatOutput("❌ Fehler bei der Verarbeitung. Bitte versuchen Sie es erneut.");
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const generateSummary = async (emailContent: string, settings: SettingsData, setEmailData: (data: any) => void) => {
+  const generateSummary = async (
+    emailContent: string,
+    settings: SettingsData,
+    setEmailData: (data: EmailData | ((prev: EmailData) => EmailData)) => void
+  ) => {
     setIsLoading(true);
-    
+
     try {
       const result = await aiService.processEmail({
-        action: 'summarize',
+        action: "summarize",
         emailContent,
-        settings
+        settings,
       });
 
       if (result.success) {
-        setEmailData((prev: EmailData) => ({ ...prev, summary: result.result }));
+        setEmailData((prev) => ({
+          ...prev,
+          summary: result.result,
+        }));
       }
     } catch (error) {
-      console.error('Summary generation error:', error);
+      console.error("Summary generation error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -127,6 +147,6 @@ export function useAIProcessing() {
     chatOutput,
     setChatOutput,
     processEmailWithAI,
-    generateSummary
+    generateSummary,
   };
 }
