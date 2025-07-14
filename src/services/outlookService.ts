@@ -23,8 +23,7 @@ export interface OutlookService {
 class OutlookServiceImpl implements OutlookService {
   private isInitialized = false;
   private composeMode = false;
-  private itemChangedCallback: ((email: OutlookEmailData) => void) | null =
-    null;
+  private itemChangedCallback: ((email: OutlookEmailData) => void) | null = null;
 
   /** Initialisiert Office.js und registriert ItemChanged-Handler */
   async initializeOffice(): Promise<void> {
@@ -43,11 +42,14 @@ class OutlookServiceImpl implements OutlookService {
         this.isInitialized = true;
 
         const item = Office.context.mailbox.item!;
+        console.log("📬 Mailbox item:", item); // ✅ Debug-Ausgabe
+
+        // 🧪 Compose-Modus zuverlässig erkennen
         this.composeMode =
           item.itemType === Office.MailboxEnums.ItemType.Message &&
           typeof item.body?.setAsync === "function";
 
-        // ItemChanged-Handler registrieren
+        // 📬 Event-Handler für Item-Wechsel registrieren
         Office.context.mailbox.addHandlerAsync(
           Office.EventType.ItemChanged,
           async () => {
@@ -98,7 +100,7 @@ class OutlookServiceImpl implements OutlookService {
     });
   }
 
-  /** 🆕 Fügt Text in das Compose-Feld (neue E-Mail) ein */
+  /** Fügt Text in das Compose-Feld (neue E-Mail) ein */
   async insertComposeText(text: string): Promise<void> {
     if (!this.isInitialized) await this.initializeOffice();
 

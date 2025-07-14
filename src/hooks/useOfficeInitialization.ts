@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+// E-Mail Datenstruktur
 interface EmailData {
   subject: string;
   sender: string;
@@ -7,6 +8,7 @@ interface EmailData {
   summary: string;
 }
 
+// Compose-Datenstruktur
 interface ComposeData {
   to: string[];
   cc: string[];
@@ -36,7 +38,7 @@ export function useOfficeInitialization() {
   useEffect(() => {
     const initialize = async () => {
       try {
-        // Warten bis Office.js bereit ist
+        // Warte bis Office.js verfügbar ist
         await new Promise<void>((resolve) => {
           if (typeof window.Office !== "undefined" && window.Office.context) {
             resolve();
@@ -49,20 +51,20 @@ export function useOfficeInitialization() {
         const item = Office.context?.mailbox?.item;
         console.log("📬 Mailbox item:", item); // ✅ Debug-Ausgabe
 
-
         if (!item) throw new Error("Kein Mail-Item gefunden");
 
         const itemType = item.itemType;
 
+        // ✅ Sicherer Check für Compose-Modus (auch Mac-kompatibel)
         const composeMode =
           itemType === Office.MailboxEnums.ItemType.Message &&
-          !Object.prototype.hasOwnProperty.call(item, "itemId");
+          typeof item.body?.setAsync === "function";
 
         setIsComposeMode(composeMode);
         setIsConnected(true);
 
         if (composeMode) {
-          // Compose Mode – Empfänger und Betreff
+          // 📨 Compose-Modus: Empfänger & Betreff auslesen
           const toRecipients: string[] = await new Promise((resolve) => {
             (item.to as Office.Recipients).getAsync(
               (res: Office.AsyncResult<Office.EmailAddressDetails[]>) => {
@@ -94,7 +96,7 @@ export function useOfficeInitialization() {
             purpose: "Neue E-Mail verfassen",
           });
         } else {
-          // Read Mode – Inhalt auslesen
+          // 📖 Lese-Modus: Inhalte auslesen
           const subject = item.subject || "";
           const sender = item.sender?.emailAddress || "";
 
@@ -117,6 +119,8 @@ export function useOfficeInitialization() {
         }
       } catch (error) {
         console.error("Office Initialization Error:", error);
+
+        // 🔁 Fallback für Entwicklung ohne Outlook
         if (process.env.NODE_ENV === "development") {
           console.warn("Fallback auf Testdaten (Entwicklung)");
           setIsComposeMode(true);
