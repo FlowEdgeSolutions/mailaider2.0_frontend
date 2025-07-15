@@ -1,5 +1,14 @@
 // src/services/outlookService.ts
+// Vereinheitlichte, robuste Office-Initialisierung + E-Mail-Zugriff
+// ---------------------------------------------------------------------
+// Dieses Modul exportiert eine Singleton-Instanz (outlookService) mit
+//  - initializeOffice()  -> Promise, erfüllt sich genau EIN Mal
+//  - getCurrentEmailData() -> Betreff, Sender, Body (Text)
+//  - onItemChanged(cb)  -> löst aus, wenn der User die Mail wechselt
+//  - insertComposeText() -> Text / HTML in neue Mail einsetzen (Compose-Modus)
 
+/* ------------------------------------------------------------------ */
+// Typdefinitionen
 interface OutlookEmailData {
   subject: string;
   sender: string;
@@ -12,113 +21,127 @@ interface OutlookEmailData {
 export interface OutlookService {
   initializeOffice(): Promise<void>;
   getCurrentEmailData(): Promise<OutlookEmailData>;
-  onItemChanged(callback: (email: OutlookEmailData) => void): void;
+  onItemChanged(cb: (email: OutlookEmailData) => void): void;
   isOfficeInitialized(): boolean;
   isComposeMode(): boolean;
-
-  // 🆕 Methode zum Einfügen von Text im Compose-Modus
-  insertComposeText(text: string): Promise<void>;
+  insertComposeText(text: string): Promise<void>; // Compose-Modus-Helper
 }
 
-class OutlookServiceImpl implements OutlookService {
-  private isInitialized = false;
-  private composeMode = false;
-  private itemChangedCallback: ((email: OutlookEmailData) => void) | null = null;
+/* ------------------------------------------------------------------ */
+// Zentraler Promise – wird beim ersten Laden des Moduls angelegt
+let resolveReady: (() => void) | null = null;
+let rejectReady: ((err: unknown) => void) | null = null;
+const officeReadyPromise: Promise<void> = new Promise<void>((resolve, reject) => {
+  resolveReady = resolve;
+  rejectReady = reject;
+});
 
-  /** Initialisiert Office.js und registriert ItemChanged-Handler */
-  async initializeOffice(): Promise<void> {
-    if (this.isInitialized) return;
-
-    await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => reject("Office.js Init Timeout"), 10000);
-
-      Office.onReady((info) => {
-        clearTimeout(timeout);
-
-        if (info.host !== Office.HostType.Outlook) {
-          return reject("Kein Outlook-Host");
-        }
-
-        this.isInitialized = true;
-
-        const item = Office.context.mailbox.item!;
-        console.log("📬 Mailbox item:", item); // ✅ Debug-Ausgabe
-
-        // 🧪 Compose-Modus zuverlässig erkennen
-        this.composeMode =
-          item.itemType === Office.MailboxEnums.ItemType.Message &&
-          typeof item.body?.setAsync === "function";
-
-        // 📬 Event-Handler für Item-Wechsel registrieren
-        Office.context.mailbox.addHandlerAsync(
-          Office.EventType.ItemChanged,
-          async () => {
-            const email = await this.getCurrentEmailData();
-            this.itemChangedCallback?.(email);
-          },
-          {},
-          () => {}
-        );
-
-        resolve();
-      });
+// Globales Office.initialize muss gesetzt sein, bevor Outlook die Runtime lädt.
+if (typeof Office !== "undefined") {
+  Office.initialize = () => {
+    Office.onReady((info) => {
+      if (info.host === Office.HostType.Outlook) {
+        console.log("[Office] ready - Host Outlook");
+        if (resolveReady) resolveReady();
+      } else {
+        if (rejectReady) rejectReady(new Error("Unsupported host: " + info.host));
+      }
     });
+  };
+}
+
+/* ------------------------------------------------------------------ */
+class OutlookServiceImpl implements OutlookService {
+  private composeMode = false;
+  private itemChangedCb: ((email: OutlookEmailData) => void) | null = null;
+  private initialized = false;
+
+  async initializeOffice(): Promise<void> {
+    if (this.initialized) return;
+
+    await officeReadyPromise;
+
+    // Compose-Modus bestimmen, wenn ein Item existiert
+    const item = Office.context.mailbox?.item as
+      | Office.MessageRead
+      | Office.MessageCompose
+      | undefined;
+
+    if (item) {
+      this.composeMode =
+        (item as Office.MessageCompose).body?.setAsync !== undefined;
+    }
+
+    // Ereignis registrieren (nur einmal)
+    Office.context.mailbox?.addHandlerAsync(
+      Office.EventType.ItemChanged,
+      async () => {
+        const email = await this.getCurrentEmailData();
+        if (this.itemChangedCb) {
+          this.itemChangedCb(email);
+        }
+      },
+      {},
+      () => undefined
+    );
+
+    this.initialized = true;
   }
 
+  /* -------------------------------------------------- */
   isOfficeInitialized(): boolean {
-    return this.isInitialized;
+    return this.initialized;
   }
 
   isComposeMode(): boolean {
     return this.composeMode;
   }
 
-  onItemChanged(callback: (email: OutlookEmailData) => void): void {
-    this.itemChangedCallback = callback;
+  onItemChanged(cb: (email: OutlookEmailData) => void): void {
+    this.itemChangedCb = cb;
   }
 
-  /** Liest Daten aus der aktuell geöffneten E-Mail */
+  /* -------------------------------------------------- */
   async getCurrentEmailData(): Promise<OutlookEmailData> {
-    if (!this.isInitialized) await this.initializeOffice();
+    await this.initializeOffice();
 
-    const item = Office.context.mailbox.item!;
+    const item = Office.context.mailbox?.item as Office.MessageRead | undefined;
+    if (!item) throw new Error("Kein Mail-Item verfügbar (Home-Pane?)");
+
     return new Promise((resolve, reject) => {
-      item.body.getAsync(Office.CoercionType.Text, (result) => {
-        if (result.status === Office.AsyncResultStatus.Succeeded) {
+      item.body.getAsync(Office.CoercionType.Text, (res) => {
+        if (res.status === Office.AsyncResultStatus.Succeeded) {
           resolve({
-            subject: item.subject || "",
-            sender: item.sender?.emailAddress || "",
-            content: result.value || "",
-            itemId: item.itemId || "",
-            conversationId: item.conversationId || "",
-            messageClass: item.itemClass || "",
+            subject: item.subject ?? "",
+            sender: item.from?.displayName || item.from?.emailAddress || "",
+            content: res.value ?? "",
+            itemId: item.itemId ?? "",
+            conversationId: item.conversationId ?? "",
+            messageClass: item.itemClass ?? "",
           });
         } else {
-          reject("Mail lesen fehlgeschlagen");
+          reject(new Error("Mail lesen fehlgeschlagen: " + res.error.message));
         }
       });
     });
   }
 
-  /** Fügt Text in das Compose-Feld (neue E-Mail) ein */
+  /* -------------------------------------------------- */
   async insertComposeText(text: string): Promise<void> {
-    if (!this.isInitialized) await this.initializeOffice();
+    await this.initializeOffice();
 
-    if (typeof Office === "undefined") {
-      console.log("🛠️ DEV: Compose-Text würde eingefügt:", text);
-      return;
-    }
+    if (!this.composeMode) throw new Error("Nicht im Compose-Modus");
 
-    const item = Office.context.mailbox.item!;
+    const item = Office.context.mailbox.item as Office.MessageCompose;
     return new Promise((resolve, reject) => {
       item.body.setAsync(
         `<div>${text.replace(/\n/g, "<br>")}</div>`,
         { coercionType: Office.CoercionType.Html },
-        (result) => {
-          if (result.status === Office.AsyncResultStatus.Succeeded) {
+        (res) => {
+          if (res.status === Office.AsyncResultStatus.Succeeded) {
             resolve();
           } else {
-            reject(new Error("Fehler beim Einfügen in Compose-Feld"));
+            reject(res.error);
           }
         }
       );
@@ -126,5 +149,5 @@ class OutlookServiceImpl implements OutlookService {
   }
 }
 
-// Export der Singleton-Instanz
+/* ------------------------------------------------------------------ */
 export const outlookService: OutlookService = new OutlookServiceImpl();
