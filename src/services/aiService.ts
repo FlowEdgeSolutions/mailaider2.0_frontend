@@ -1,7 +1,7 @@
 // src/services/aiService.ts
 export interface AIRequest {
-  action: "summarize" | "reply" | "translate" | "custom";
-  emailContent: string;
+  action: "summarize" | "reply" | "translate" | "custom" | "compose";
+  emailContent?: string;
   settings: {
     tone: string;
     greeting: string;
@@ -10,25 +10,32 @@ export interface AIRequest {
   };
   customPrompt?: string;
   recipientName?: string;
+  composeContext?: {
+    to: string[];
+    subject: string;
+    purpose: string;
+  };
 }
 
 export interface AIResponse {
   success: boolean;
   result: string;
-  /** Full raw response returned for debugging */
   raw?: unknown;
   error?: string;
 }
 
 export class AIServiceImpl {
-  // IDENTISCHE Werte wie im alten HTML
   private apiKey =
     "9psvVslPXfp4xbJ9SzRXpfx9E9lP8TLiFcC3IZgf43RLNQA9RiV4JQQJ99BFACI8hq2XJ3w3AAABACOGHQcr";
   private endpoint = "https://openaiaddinapi.openai.azure.com";
   private deployment = "gpt-4o_MailAiderAi_OutlookAddIn";
   private version = "2025-01-01-preview";
 
-  /** Führt die API‑Anfrage aus */
+  public isConfigured(): boolean {
+    return Boolean(this.apiKey && this.apiKey.trim());
+  }
+
+  /* -------------------------------------------------- */
   async processEmail(request: AIRequest): Promise<AIResponse> {
     try {
       const prompt = this.buildPrompt(request);
@@ -60,7 +67,6 @@ export class AIServiceImpl {
       }
 
       const data = await res.json();
-      // Vollständige Antwort im Dev-Tools-Log ausgeben
       console.log("🔎 OpenAI Response", data);
 
       return {
@@ -74,10 +80,16 @@ export class AIServiceImpl {
     }
   }
 
-  /** Baut den Prompt basierend auf Aktion und Einstellungen */
+  /* -------------------------------------------------- */
   private buildPrompt(req: AIRequest): string {
+    // Compose-Kontext priorisieren
+    if (req.action === "compose" && req.composeContext) {
+      const { to, subject, purpose } = req.composeContext;
+      return `Verfasse eine neue E-Mail an ${to.join(", ")} mit Betreff "${subject}". Zweck: ${purpose}`;
+    }
+
     const base =
-      `E-Mail-Inhalt:\n${req.emailContent}\n` +
+      `E-Mail-Inhalt:\n${req.emailContent ?? ""}\n` +
       `Einstellungen: Ton=${req.settings.tone}, Länge=${req.settings.length}, Sprache=${req.settings.language}\n`;
 
     switch (req.action) {
@@ -87,6 +99,7 @@ export class AIServiceImpl {
         return `Schreibe eine Antwort auf die folgende E-Mail:\n${base}`;
       case "translate":
         return `Übersetze den folgenden Inhalt ins ${req.settings.language}:\n${base}`;
+      case "custom":
       default:
         return `${base}${req.customPrompt || ""}`;
     }
