@@ -4,20 +4,37 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
+
   "compilerOptions": {
+    /* === Allgemein === */
+    "target": "ES2022",                // moderner Output für Vite (esbuild)
+    "moduleResolution": "node",
+    "module": "ESNext",
+    "lib": ["DOM", "ES2022"],
+
+    /* === Pfadalias === */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     },
-    "types": ["@microsoft/office-js"],  // Geändert von "microsoft-office-js" zur korrekten Package-Bezeichnung
+
+    /* === JSX + React 18 === */
+    "jsx": "react-jsx",                // benötigt @vitejs/plugin-react-swc
+
+    /* === Typen === */
+    "types": ["@microsoft/office-js"], // Office.js Typen – korrektes Paket
+    "typeRoots": ["./node_modules/@types", "./node_modules/@microsoft"],
     "skipLibCheck": true,
-    "allowJs": true,
-    "strictNullChecks": false,
-    "moduleResolution": "node",        // Wichtig für Package-Auflösung
-    "esModuleInterop": true,           // Ermöglicht bessere Interoperabilität
-    "typeRoots": [                     // Explizite Typ-Pfade
-      "./node_modules/@types",
-      "./node_modules/@microsoft"
-    ]
+
+    /* === Strictness === */
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* === Source Maps === */
+    "sourceMap": true
   }
 }
