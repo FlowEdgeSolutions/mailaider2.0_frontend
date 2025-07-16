@@ -10,14 +10,12 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     https: {} as ServerOptions,
     headers: {
-      // Erweiterte CSP für Office Add-ins
       "Content-Security-Policy":
         "default-src 'self' 'unsafe-inline' https: wss:; " +
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://appsforoffice.microsoft.com https://ajax.aspnetcdn.com; " +
         "connect-src 'self' https: wss:; " +
         "frame-src 'self' https:; " +
         "img-src 'self' data: https:;",
-      // Wichtig für Office Add-ins
       "X-Frame-Options": "SAMEORIGIN",
     },
   },
@@ -33,10 +31,9 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: {
         main: "./index.html",
-        functionFile: "./public/function.html",
+        functionFile: "./src/function.html", // Updated path
       },
     },
-    // Für bessere Office Add-in Kompatibilität
     target: "es2015",
     minify: "terser",
     terserOptions: {
@@ -45,7 +42,6 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  // Für Office Add-in Entwicklung
   define: {
     global: "globalThis",
   },
