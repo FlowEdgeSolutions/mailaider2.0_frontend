@@ -25,17 +25,25 @@
     <Host Name="Mailbox"/>
   </Hosts>
 
-  <!-- Fallback-Taskpane (ItemRead) -->
+  <!-- Fallback-Taskpane (ItemRead & ItemEdit) -->
   <Requirements>
     <Sets>
       <Set Name="Mailbox" MinVersion="1.3"/>
     </Sets>
   </Requirements>
   <FormSettings>
+    <!-- Read-Form (bestehende Einstellung) -->
     <Form xsi:type="ItemRead">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/"/>
         <RequestedHeight>250</RequestedHeight>
+      </DesktopSettings>
+    </Form>
+    <!-- Ergänzung für ItemEdit -->
+    <Form xsi:type="ItemEdit">
+      <DesktopSettings>
+        <SourceLocation DefaultValue="https://khaled-ayub.github.io/MailAider4.0/function.html"/>
+        <RequestedHeight>450</RequestedHeight>
       </DesktopSettings>
     </Form>
   </FormSettings>

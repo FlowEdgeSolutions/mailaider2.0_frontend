@@ -1,40 +1,35 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
-
   "compilerOptions": {
-    /* === Allgemein === */
-    "target": "ES2022",                // moderner Output für Vite (esbuild)
-    "moduleResolution": "node",
-    "module": "ESNext",
-    "lib": ["DOM", "ES2022"],
-
-    /* === Pfadalias === */
-    "baseUrl": ".",
+    /* === Pfad-Alias === */
+    "baseUrl": "src",               // z. B. @/components/ui → src/components/ui
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["*"]
     },
 
-    /* === JSX + React 18 === */
-    "jsx": "react-jsx",                // benötigt @vitejs/plugin-react-swc
+    /* === Reaktives Verhalten mit JSX === */
+    "jsx": "react",                 // WICHTIG: KEIN "react-jsx" im Outlook-Add-in
 
-    /* === Typen === */
-    "types": ["@microsoft/office-js"], // Office.js Typen – korrektes Paket
-    "typeRoots": ["./node_modules/@types", "./node_modules/@microsoft"],
-    "skipLibCheck": true,
-
-    /* === Strictness === */
-    "strict": true,
-    "noImplicitOverride": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
+    /* === Kompatibilität + Typing === */
+    "target": "es5",                // Office.js läuft am besten mit ES5
+    "module": "commonjs",           // kein ESNext – klassisch für Webpack
+    "lib": ["es2015", "dom"],       // damit moderne APIs + DOM verfügbar sind
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,                // JS-Dateien werden unterstützt
+    "experimentalDecorators": true,
 
-    /* === Source Maps === */
-    "sourceMap": true
+    /* === Output === */
+    "outDir": "lib",
+    "sourceMap": true,
+    "noEmitOnError": true,
+
+    /* === Sonstiges === */
+    "skipLibCheck": true,           // optional: beschleunigt Build
+    "forceConsistentCasingInFileNames": true
+  },
+
+  "exclude": ["node_modules", "dist", "lib", "lib-amd"],
+
+  "ts-node": {
+    "files": true
   }
 }

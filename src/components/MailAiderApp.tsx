@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "./Header";
 import { EmailViewer } from "./EmailViewer";
@@ -25,6 +25,9 @@ interface SettingsData {
 }
 
 export function MailAiderApp() {
+  const devMode = true;              // 🛠 Dev-Modus aktivieren
+  const devComposeMode = false;     // true = Compose, false = Antwort/Lese
+
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [currentAction, setCurrentAction] = useState("antworten");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -70,13 +73,9 @@ export function MailAiderApp() {
 
   const isLoading = officeLoading || aiLoading;
 
-  // Automatischer Wechsel zu "verfassen" im Compose-Modus
-  useEffect(() => {
-    if (isComposeMode && currentAction === "antworten") {
-      setCurrentAction("verfassen");
-      setChatOutput("Bereit zum Verfassen einer neuen E-Mail...");
-    }
-  }, [isComposeMode, currentAction, setChatOutput]);
+  // 🔁 Effektive Werte (echte oder simulierte)
+  const effectiveConnected = devMode ? true : isConnected;
+  const effectiveComposeMode = devMode ? devComposeMode : isComposeMode;
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -85,7 +84,7 @@ export function MailAiderApp() {
 
   const handleActionSelect = (action: string) => {
     setCurrentAction(action);
-    if (isConnected && action !== "verfassen") {
+    if (action !== "verfassen") {
       requestAnimationFrame(() => {
         setIsSettingsOpen(true);
       });
@@ -102,7 +101,7 @@ export function MailAiderApp() {
       userPrompt,
       recipientName,
       settings,
-      isComposeMode,
+      effectiveComposeMode,
       emailData,
       composeData
     );
@@ -120,7 +119,7 @@ export function MailAiderApp() {
   };
 
   const handleInsertReply = () => {
-    insertReply(chatOutput, isComposeMode);
+    insertReply(chatOutput, effectiveComposeMode);
   };
 
   return (
@@ -133,25 +132,25 @@ export function MailAiderApp() {
         <Header
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
-          isConnected={isConnected}
+          isConnected={effectiveConnected}
           onStatusClick={showDsgvoInfo}
         />
 
-        {/* Debug ausgabe */}
-        <div className="bg-red-100 p-2 text-xs">
-          <div>isConnected: {isConnected.toString()}</div>
-          <div>isComposeMode: {isComposeMode.toString()}</div>
-          <div>isLoading: {isLoading.toString()}</div>
-          <div>emailData: {JSON.stringify(emailData, null, 2)}</div>
-        </div>
+        {!effectiveConnected && (
+          <div className="bg-yellow-100 p-4 rounded-lg">
+            <h3 className="font-bold">Warnung</h3>
+            <p>Die Verbindung zu Outlook konnte nicht hergestellt werden. 
+            Einige Funktionen sind möglicherweise eingeschränkt.</p>
+          </div>
+        )}
 
         <DebugInfo
-          isConnected={isConnected}
-          isComposeMode={isComposeMode}
+          isConnected={effectiveConnected}
+          isComposeMode={effectiveComposeMode}
           isLoading={isLoading}
         />
 
-        {isComposeMode ? (
+        {effectiveComposeMode ? (
           <>
             <ComposeViewer
               composeData={composeData}
@@ -192,8 +191,8 @@ export function MailAiderApp() {
         <ActionButtons
           currentAction={currentAction}
           onActionSelect={handleActionSelect}
-          isConnected={isConnected}
-          isComposeMode={isComposeMode}
+          isConnected={effectiveConnected}
+          isComposeMode={effectiveComposeMode}
         />
 
         <SettingsModal
