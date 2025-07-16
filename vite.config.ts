@@ -1,10 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import path from "path";
+import path, { resolve } from "path";
 import type { ServerOptions } from "https";
 
 export default defineConfig(({ mode }) => ({
+  // Basis-URL für Produktion vs. Entwicklung
   base: mode === "production" ? "/MailAider4.0/" : "/",
+
   server: {
     host: "::",
     port: 8080,
@@ -19,19 +21,22 @@ export default defineConfig(({ mode }) => ({
       "X-Frame-Options": "SAMEORIGIN",
     },
   },
+
   plugins: [react()],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
   build: {
     outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: "./index.html",
-        functionFile: "./src/function.html", // Updated path
+        main: resolve(__dirname, "index.html"),
+        functionFile: resolve(__dirname, "src/function.html"),
       },
     },
     target: "es2015",
@@ -42,6 +47,7 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+
   define: {
     global: "globalThis",
   },

@@ -1,93 +1,114 @@
 // src/services/outlookService.ts
 
 // ------------------------------------------------------------------
-// Externe Funktionen für Einfügen von Text ins Body und Ribbon-Handler
+// External functions for inserting text into body and ribbon handlers
 // ------------------------------------------------------------------
 
 /**
- * Fügt Text in den Body einer Outlook-Nachricht ein (je nach Modus unterschiedlich)
- * @param text Der einzufügende Text (als HTML)
- * @param isComposeMode Gibt an, ob sich die Nachricht im Bearbeitungsmodus befindet
- * @returns Promise, das erfolgreich ist, wenn der Text eingefügt wurde
+ * Inserts formatted text into the body of an Outlook message
+ * @param text - The text to insert (as HTML)
+ * @param isComposeMode - True if in compose mode, false in read mode
+ * @returns Promise that resolves on success or rejects on error
+ * 
+ * @description
+ * Distinguishes between:
+ * - Compose mode: Inserts at cursor position
+ * - Read mode: Inserts at beginning of message
  */
-export async function insertTextIntoBody(text: string, isComposeMode: boolean): Promise<void> {
+export async function insertTextIntoBody(
+  text: string,
+  isComposeMode: boolean
+): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    // Holt das aktuelle Mail-Item aus dem Outlook-Kontext
     const item = Office.context.mailbox.item as
       | Office.MessageRead
       | Office.MessageCompose;
-      
-    // Im Bearbeitungsmodus: Text an aktueller Cursorposition einfügen
+
+    // Compose mode: Insert at cursor position
     if (isComposeMode && (item as Office.MessageCompose).body?.setSelectedDataAsync) {
       item.body.setSelectedDataAsync(
         text,
-        { coercionType: Office.CoercionType.Html }, // Gibt an, dass der Text HTML ist
-        result => result.status === Office.AsyncResultStatus.Succeeded ? resolve() : reject(result.error)
+        { coercionType: Office.CoercionType.Html },
+        (result) => result.status === Office.AsyncResultStatus.Succeeded
+          ? resolve()
+          : reject(result.error)
       );
-    } 
-    // Im Lesemodus: Text am Anfang der Nachricht einfügen
+    }
+    // Read mode: Insert at beginning
     else if (!isComposeMode && (item as Office.MessageRead).body?.prependAsync) {
       (item as Office.MessageRead).body.prependAsync(
         text,
         { coercionType: Office.CoercionType.Html },
-        result => result.status === Office.AsyncResultStatus.Succeeded ? resolve() : reject(result.error)
+        (result) => result.status === Office.AsyncResultStatus.Succeeded
+          ? resolve()
+          : reject(result.error)
       );
     } else {
-      reject(new Error("Body-API nicht verfügbar"));
+      reject(new Error("Required Body API not available"));
     }
   });
 }
 
 /**
- * Handler für den Ribbon-Button "Reply with MailAider"
- * Wird aufgerufen, wenn der Benutzer den Button im Outlook-Ribbon klickt
+ * Handler for the "Reply with MailAider" ribbon button
+ * 
+ * @description
+ * Triggered when ribbon button is clicked and:
+ * 1. Checks current mode (Compose/Read)
+ * 2. Inserts predefined text
+ * 3. Handles errors and returns control to Office
  */
-Office.actions.associate("onReplyWithMailAider", async event => {
+Office.actions.associate("onReplyWithMailAider", async (event) => {
   try {
-    // Prüft, ob wir uns im Bearbeitungsmodus befinden
     const isCompose = outlookService.isComposeMode();
-    // Fügt vordefinierten Text in die Nachricht ein
-    await insertTextIntoBody("<p>Antwort von MailAider …</p>", isCompose);
+    await insertTextIntoBody("<p>Reply from MailAider ...</p>", isCompose);
   } catch (err) {
-    console.error(err);
+    console.error("Error replying with MailAider:", err);
   } finally {
-    // Wichtig: Muss immer aufgerufen werden, um dem Office-System mitzuteilen,
-    // dass die Aktion abgeschlossen ist
-    event.completed();
+    event.completed(); // Important for Office integration
   }
 });
 
 // ------------------------------------------------------------------
-// OutlookService Interface & Implementierung
+// OutlookService Interface & Implementation
 // ------------------------------------------------------------------
 
 /**
- * Interface für die Daten einer Outlook-Email
+ * Interface for Outlook email data
+ * 
+ * @property subject - Message subject
+ * @property sender - Sender information (Name <email>)
+ * @property content - Cleaned message content
+ * @property itemId - Unique message ID
+ * @property conversationId - Conversation ID
+ * @property messageClass - Message class (e.g. IPM.Note)
  */
 interface OutlookEmailData {
-  subject: string;         // Betreff der Nachricht
-  sender: string;          // Absender (Name oder Email)
-  content: string;         // Inhalt der Nachricht
-  itemId: string;          // Eindeutige ID der Nachricht
-  conversationId: string;  // ID der Konversation
-  messageClass: string;    // Nachrichtenklasse (z.B. IPM.Note)
+  subject: string;
+  sender: string;
+  content: string;
+  itemId: string;
+  conversationId: string;
+  messageClass: string;
 }
 
 /**
- * Interface für den OutlookService
- * Definiert die öffentliche API für die Interaktion mit Outlook
+ * Interface for OutlookService
+ * 
+ * @description
+ * Defines the public API for Outlook integration
  */
 export interface OutlookService {
-  initializeOffice(): Promise<void>;                   // Initialisiert die Office-API
-  getCurrentEmailData(): Promise<OutlookEmailData>;    // Holt Daten der aktuellen Email
-  onItemChanged(cb: (email: OutlookEmailData) => void): void; // Callback bei Email-Wechsel
-  isOfficeInitialized(): boolean;                     // Prüft Initialisierung
-  isComposeMode(): boolean;                           // Prüft Bearbeitungsmodus
-  insertComposeText(text: string): Promise<void>;      // Fügt Text im Bearbeitungsmodus ein
-  insertReplyText(text: string): Promise<void>;        // Fügt Text im Antwortmodus ein
+  initializeOffice(): Promise<void>;
+  getCurrentEmailData(): Promise<OutlookEmailData>;
+  onItemChanged(cb: (email: OutlookEmailData) => void): void;
+  isOfficeInitialized(): boolean;
+  isComposeMode(): boolean;
+  insertComposeText(text: string): Promise<void>;
+  insertReplyText(text: string): Promise<void>;
 }
 
-// Promise für Office-Initialisierung
+// Global promise for Office initialization
 let officeResolve: () => void;
 let officeReject: (err: unknown) => void;
 const officeReady = new Promise<void>((resolve, reject) => {
@@ -95,44 +116,53 @@ const officeReady = new Promise<void>((resolve, reject) => {
   officeReject = reject;
 });
 
-// Initialisiert die Office-API, wenn sie verfügbar ist
+// Initialize Office API when available
 if (typeof Office !== "undefined") {
   Office.initialize = () => {
-    Office.onReady(info => {
-      // Prüft, ob wir in Outlook sind
+    Office.onReady((info) => {
       if (info.host === Office.HostType.Outlook) {
         officeResolve();
       } else {
-        officeReject(new Error("Unsupported host: " + info.host));
+        officeReject(new Error(`Unsupported host: ${info.host}`));
       }
     });
   };
 }
 
 /**
- * Implementierung des OutlookService
+ * Implementation of OutlookService
+ * 
+ * @class OutlookServiceImpl
+ * @implements {OutlookService}
+ * 
+ * @description
+ * Central class for Outlook integration with:
+ * - Initialization logic
+ * - Event handling
+ * - Data extraction
+ * - Content manipulation
  */
 class OutlookServiceImpl implements OutlookService {
-  private initialized = false;          // Speichert den Initialisierungsstatus
-  private composeMode = false;          // Gibt an, ob wir im Bearbeitungsmodus sind
-  private itemChangedCb: ((email: OutlookEmailData) => void) | null = null; // Callback für Email-Wechsel
+  private initialized = false;
+  private composeMode = false;
+  private itemChangedCb: ((email: OutlookEmailData) => void) | null = null;
 
   /**
-   * Initialisiert die Office-API
+   * Initializes the Office API
+   * 
+   * @description
+   * 1. Waits for Office readiness
+   * 2. Sets compose mode flag
+   * 3. Registers ItemChanged handler
    */
   async initializeOffice(): Promise<void> {
     if (this.initialized) return;
-    await officeReady; // Wartet auf die Office-Initialisierung
+    
+    await officeReady;
+    const item = Office.context.mailbox.item;
 
-    const item = Office.context.mailbox.item as
-      | Office.MessageRead
-      | Office.MessageCompose
-      | undefined;
-
-    // Prüft, ob wir im Bearbeitungsmodus sind
     this.composeMode = !!item && !!(item as Office.MessageCompose).body?.setAsync;
 
-    // Registriert einen Handler für Email-Wechsel
     Office.context.mailbox.addHandlerAsync(
       Office.EventType.ItemChanged,
       async () => {
@@ -153,76 +183,165 @@ class OutlookServiceImpl implements OutlookService {
     return this.composeMode;
   }
 
-  /**
-   * Setzt einen Callback, der bei Email-Wechsel aufgerufen wird
-   * @param cb Callback-Funktion
-   */
   onItemChanged(cb: (email: OutlookEmailData) => void): void {
     this.itemChangedCb = cb;
   }
 
   /**
-   * Holt die Daten der aktuell angezeigten Email
+   * Extracts and cleans current email data
+   * 
+   * @returns Promise with processed email data
+   * 
+   * @description
+   * 1. Gets raw data from Outlook item
+   * 2. Cleans content (signatures, quotes)
+   * 3. Formats sender information
+   * 4. Returns structured data
    */
   async getCurrentEmailData(): Promise<OutlookEmailData> {
     await this.initializeOffice();
-
-    const item = Office.context.mailbox.item as Office.MessageRead;
-    if (!item) throw new Error("Kein Mail-Item verfügbar");
+    const item = Office.context.mailbox.item;
+    if (!item) throw new Error("No mail item available");
 
     return new Promise((resolve, reject) => {
-      // Holt den Nachrichteninhalt als Text
-      item.body.getAsync(
-        Office.CoercionType.Text,
-        res => {
-          if (res.status === Office.AsyncResultStatus.Succeeded) {
-            resolve({
-              subject: item.subject || "",
-              sender: item.from?.displayName || item.from?.emailAddress || "",
-              content: res.value || "",
-              itemId: item.itemId || "",
-              conversationId: item.conversationId || "",
-              messageClass: item.itemClass || "",
-            });
-          } else {
-            reject(new Error(res.error.message));
-          }
+      item.body.getAsync(Office.CoercionType.Text, (res) => {
+        if (res.status !== Office.AsyncResultStatus.Succeeded) {
+          return reject(new Error(res.error.message));
         }
-      );
+
+        const rawContent = res.value || "";
+        const emailData: OutlookEmailData = {
+          subject: this.getSafeSubject(item),
+          sender: this.getSenderInfo(item),
+          content: this.cleanEmailContent(rawContent),
+          itemId: this.getSafeItemId(item),
+          conversationId: this.getSafeConversationId(item),
+          messageClass: this.getSafeMessageClass(item)
+        };
+
+        resolve(emailData);
+      });
     });
   }
 
   /**
-   * Fügt Text in eine neue Nachricht ein (Bearbeitungsmodus)
-   * @param text Der einzufügende Text
+   * Cleans email content of unwanted parts
+   * 
+   * @param content - Raw email content
+   * @returns Cleaned content
+   * 
+   * @description Removes:
+   * 1. Signatures (multilingual)
+   * 2. Quoted text
+   * 3. Forward markers
+   * 4. Excessive empty lines
+   */
+  private cleanEmailContent(content: string): string {
+    // Remove signatures
+    const withoutSignature = content.split(
+      /(--\s*$|Mit freundlichen Grüßen|Best regards|Kind regards|Cordialement|Saludos)/i
+    )[0];
+
+    // Remove quotes and metadata
+    const withoutQuotes = withoutSignature
+      .replace(/^>.*$/gm, '')
+      .replace(/^-+.*Forwarded.*-+$/gim, '')
+      .replace(/^From:.*$/gim, '');
+
+    // Clean formatting
+    return withoutQuotes
+      .replace(/\n\s*\n/g, '\n\n')
+      .trim();
+  }
+
+  // Helper functions for safe property access with type checking
+  private getSafeSubject(item: Office.Item): string {
+    return "subject" in item && typeof item.subject === "string" 
+      ? item.subject 
+      : "";
+  }
+
+  private getSafeItemId(item: Office.Item): string {
+    return "itemId" in item && typeof item.itemId === "string" 
+      ? item.itemId 
+      : "";
+  }
+
+  private getSafeConversationId(item: Office.Item): string {
+    return "conversationId" in item && typeof item.conversationId === "string" 
+      ? item.conversationId 
+      : "";
+  }
+
+  private getSafeMessageClass(item: Office.Item): string {
+    return "itemClass" in item && typeof item.itemClass === "string" 
+      ? item.itemClass 
+      : "";
+  }
+
+  /**
+   * Extracts sender information with complete type checking
+   * 
+   * @param item - The Outlook item
+   * @returns Formatted sender info (Name <email> or just email)
+   */
+  private getSenderInfo(item: Office.Item): string {
+    // 1. Check if 'from' exists at all
+    if (!("from" in item)) return "";
+    
+    // 2. Type narrowing for MessageRead
+    const messageRead = item as Office.MessageRead;
+    if (!messageRead.from) return "";
+    
+    // 3. Safe property access with optional chaining
+    const displayName = messageRead.from.displayName?.trim();
+    const emailAddress = messageRead.from.emailAddress?.trim();
+    
+    // 4. Format based on available data
+    if (emailAddress) {
+      return displayName 
+        ? `${displayName} <${emailAddress}>` 
+        : emailAddress;
+    }
+    
+    return "";
+  }
+
+  /**
+   * Inserts text in compose mode
+   * 
+   * @param text - Text to insert
+   * @throws When not in compose mode
    */
   async insertComposeText(text: string): Promise<void> {
     await this.initializeOffice();
-    if (!this.composeMode) throw new Error("Nicht im Compose-Modus");
+    if (!this.composeMode) throw new Error("Not in compose mode");
 
     const item = Office.context.mailbox.item as Office.MessageCompose;
     return new Promise((resolve, reject) => {
-      // Ersetzt Zeilenumbrüche durch <br> und setzt den gesamten Text
       item.body.setAsync(
         `<div>${text.replace(/\n/g, "<br>")}</div>`,
         { coercionType: Office.CoercionType.Html },
-        res => (res.status === Office.AsyncResultStatus.Succeeded ? resolve() : reject(res.error))
+        (res) => res.status === Office.AsyncResultStatus.Succeeded
+          ? resolve()
+          : reject(res.error)
       );
     });
   }
 
   /**
-   * Fügt Text in eine Antwort ein (Antwortmodus)
-   * @param text Der einzufügende Text
+   * Inserts text in reply mode
+   * 
+   * @param text - Text to insert
+   * @throws When not in read mode
    */
   async insertReplyText(text: string): Promise<void> {
     await this.initializeOffice();
-    if (this.composeMode) throw new Error("Nicht im Read-Reply-Modus");
+    if (this.composeMode) throw new Error("Not in reply mode");
 
     const item = Office.context.mailbox.item as Office.MessageRead;
     return new Promise((resolve, reject) => {
       try {
-        // Zeigt das Antwortformular mit dem vorgegebenen Text an
         item.displayReplyForm(text);
         resolve();
       } catch (err) {
@@ -232,5 +351,5 @@ class OutlookServiceImpl implements OutlookService {
   }
 }
 
-// Exportiert eine Singleton-Instanz des OutlookService
+// Singleton service instance
 export const outlookService: OutlookService = new OutlookServiceImpl();
