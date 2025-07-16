@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { Mail, User, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -16,9 +16,34 @@ interface EmailViewerProps {
   isLoading: boolean;
 }
 
-export function EmailViewer({ emailData, showSummary, onToggleSummary, isLoading }: EmailViewerProps) {
+export function EmailViewer({ 
+  emailData, 
+  showSummary, 
+  onToggleSummary, 
+  isLoading 
+}: EmailViewerProps) {
+  const [error, setError] = useState<string | null>(null);
+
+  // Fallback für leere Inhalte
+  if (!emailData.content && !isLoading) {
+    return (
+      <div className="card-modern p-4 text-center">
+        <Mail className="w-8 h-8 mx-auto text-muted-foreground" />
+        <p className="mt-2 text-sm text-muted-foreground">
+          Kein E-Mail-Inhalt gefunden oder E-Mail nicht unterstützt
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="card-modern p-4 space-y-3 animate-slide-up" data-tutorial="email-viewer">
+      {error && (
+        <div className="bg-destructive/10 p-3 rounded-lg border border-destructive">
+          <p className="text-destructive text-sm">{error}</p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <h2 className="text-base font-ui text-foreground truncate">{emailData.subject}</h2>
         <div className="flex items-center gap-2 text-xs font-body text-muted-foreground">
