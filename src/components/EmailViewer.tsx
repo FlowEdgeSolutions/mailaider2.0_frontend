@@ -23,8 +23,8 @@ export function EmailViewer({
   isLoading 
 }: EmailViewerProps) {
   const [error, setError] = useState<string | null>(null);
+  const [showFullContent, setShowFullContent] = useState(false);
 
-  // Fallback für leere Inhalte
   if (!emailData.content && !isLoading) {
     return (
       <div className="card-modern p-4 text-center">
@@ -61,25 +61,42 @@ export function EmailViewer({
         </div>
       )}
 
-      <Button
-        onClick={onToggleSummary}
-        variant="outline"
-        size="sm"
-        className="w-full transition-all duration-300 hover:scale-105"
-        disabled={isLoading}
-      >
-        {showSummary ? (
-          <>
-            <ChevronUp className="w-4 h-4 mr-2" />
-            Zusammenfassung verbergen
-          </>
-        ) : (
-          <>
-            <ChevronDown className="w-4 h-4 mr-2" />
-            Zusammenfassung anzeigen
-          </>
+      <div className="space-y-2">
+        <Button
+          onClick={onToggleSummary}
+          variant="outline"
+          size="sm"
+          className="w-full transition-all duration-300 hover:scale-105"
+          disabled={isLoading}
+        >
+          {showSummary ? (
+            <>
+              <ChevronUp className="w-4 h-4 mr-2" />
+              Zusammenfassung verbergen
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-4 h-4 mr-2" />
+              Zusammenfassung anzeigen
+            </>
+          )}
+        </Button>
+
+        <Button
+          onClick={() => setShowFullContent(!showFullContent)}
+          variant="ghost"
+          size="sm"
+          className="w-full text-xs text-muted-foreground underline hover:text-primary"
+        >
+          {showFullContent ? 'Originaltext verbergen' : 'Originaltext anzeigen'}
+        </Button>
+
+        {showFullContent && (
+          <div className="text-sm font-body text-foreground/90 bg-muted p-3 rounded-lg whitespace-pre-line border border-border animate-fade-in">
+            {emailData.content}
+          </div>
         )}
-      </Button>
+      </div>
     </div>
   );
 }
