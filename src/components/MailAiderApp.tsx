@@ -17,7 +17,7 @@ import { useTutorial } from "@/hooks/useTutorial";
 import { useAppActions } from "@/hooks/useAppActions";
 import ComposeEditor from "./ComposeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 // 🧠 Einheitlicher Typ für alle Email-Daten
@@ -47,32 +47,44 @@ function InlineSettings({ settings, onSettingsChange, disabled }: { settings: Se
         <div>
           <Label>Tonfall</Label>
           <Select value={settings.tone} onValueChange={v => onSettingsChange({ ...settings, tone: v })} disabled={disabled}>
-            <option value="formell">Formell</option>
-            <option value="informell">Informell</option>
-            <option value="neutral">Neutral</option>
+            <SelectTrigger />
+            <SelectContent>
+              <SelectItem value="formell">Formell</SelectItem>
+              <SelectItem value="informell">Informell</SelectItem>
+              <SelectItem value="neutral">Neutral</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div>
           <Label>Anrede</Label>
           <Select value={settings.greeting} onValueChange={v => onSettingsChange({ ...settings, greeting: v })} disabled={disabled}>
-            <option value="informell">Du (informell)</option>
-            <option value="formell">Sie (formell)</option>
+            <SelectTrigger />
+            <SelectContent>
+              <SelectItem value="informell">Du (informell)</SelectItem>
+              <SelectItem value="formell">Sie (formell)</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div>
           <Label>Länge</Label>
           <Select value={settings.length} onValueChange={v => onSettingsChange({ ...settings, length: v })} disabled={disabled}>
-            <option value="kurz">Kurz</option>
-            <option value="mittel">Mittel</option>
-            <option value="lang">Lang</option>
+            <SelectTrigger />
+            <SelectContent>
+              <SelectItem value="kurz">Kurz</SelectItem>
+              <SelectItem value="mittel">Mittel</SelectItem>
+              <SelectItem value="lang">Lang</SelectItem>
+            </SelectContent>
           </Select>
         </div>
         <div>
           <Label>Sprache</Label>
           <Select value={settings.language} onValueChange={v => onSettingsChange({ ...settings, language: v })} disabled={disabled}>
-            <option value="deutsch">Deutsch</option>
-            <option value="englisch">Englisch</option>
-            <option value="französisch">Französisch</option>
+            <SelectTrigger />
+            <SelectContent>
+              <SelectItem value="deutsch">Deutsch</SelectItem>
+              <SelectItem value="englisch">Englisch</SelectItem>
+              <SelectItem value="französisch">Französisch</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>
