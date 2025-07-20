@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { MessageSquare, FileText, Languages, Wand2, PenTool } from 'lucide-react';
+import { MessageSquare, FileText, Languages, Wand2, PenTool, SearchCheck } from 'lucide-react';
 
 interface ActionButtonsProps {
   currentAction: string;
@@ -97,7 +97,8 @@ export function ActionButtons({ currentAction, onActionSelect, isConnected, isCo
                 size="sm"
                 className="flex-1 p-3 h-auto flex-col gap-1 relative transition-all duration-150 hover:scale-105 active:scale-95"
               >
-                <Wand2 className="w-5 h-5" />
+                {/* Lokales SVG-Icon unterstützt keine className-Prop, Styling im SVG selbst */}
+                <SearchCheck className="w-5 h-5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
