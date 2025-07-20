@@ -75,8 +75,8 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
             <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line max-h-[220px] overflow-y-auto pr-2 animate-fade-in custom-scrollbar">
               {output && output !== 'Warte auf Ausgabe...'
                 ? output
-                : !isLoading && !isTransitioning && (
-                    <span className="text-muted-foreground">Hier erscheint deine generierte E-Mail.</span>
+                : (
+                    <span className="text-muted-foreground">Hier wird deine generierte E-Mail angezeigt.</span>
                   )}
             </div>
           </div>

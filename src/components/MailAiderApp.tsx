@@ -17,7 +17,7 @@ import { useTutorial } from "@/hooks/useTutorial";
 import { useAppActions } from "@/hooks/useAppActions";
 import ComposeEditor from "./ComposeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Settings2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
@@ -57,7 +57,9 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block">Tonfall:</Label>
           <Select value={settings.tone} onValueChange={v => onSettingsChange({ ...settings, tone: v })} disabled={disabled}>
-            <SelectTrigger />
+            <SelectTrigger className="bg-white dark:bg-zinc-900">
+              <SelectValue placeholder="Tonfall wählen..." />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="formell">Formell</SelectItem>
               <SelectItem value="informell">Informell</SelectItem>
@@ -68,7 +70,9 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block">Anrede:</Label>
           <Select value={settings.greeting} onValueChange={v => onSettingsChange({ ...settings, greeting: v })} disabled={disabled}>
-            <SelectTrigger />
+            <SelectTrigger className="bg-white dark:bg-zinc-900">
+              <SelectValue placeholder="Anrede wählen..." />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="informell">Du (informell)</SelectItem>
               <SelectItem value="formell">Sie (formell)</SelectItem>
@@ -78,7 +82,9 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block">Länge:</Label>
           <Select value={settings.length} onValueChange={v => onSettingsChange({ ...settings, length: v })} disabled={disabled}>
-            <SelectTrigger />
+            <SelectTrigger className="bg-white dark:bg-zinc-900">
+              <SelectValue placeholder="Länge wählen..." />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="kurz">Kurz</SelectItem>
               <SelectItem value="mittel">Mittel</SelectItem>
@@ -89,7 +95,9 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block">Sprache:</Label>
           <Select value={settings.language} onValueChange={v => onSettingsChange({ ...settings, language: v })} disabled={disabled}>
-            <SelectTrigger />
+            <SelectTrigger className="bg-white dark:bg-zinc-900">
+              <SelectValue placeholder="Sprache wählen..." />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="deutsch">Deutsch</SelectItem>
               <SelectItem value="englisch">Englisch</SelectItem>
@@ -187,7 +195,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     if (effectiveComposeMode && currentAction !== "verfassen") {
       setCurrentAction("verfassen");
     }
-  }, [effectiveComposeMode]);
+  }, [effectiveComposeMode, currentAction]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
