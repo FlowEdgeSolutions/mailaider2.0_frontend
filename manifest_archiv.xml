@@ -11,7 +11,7 @@
   <Version>1.0.0.7</Version>
   <ProviderName>MailAider</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="MailAider AI -- 3.0 NEW"/>
+  <DisplayName DefaultValue="MailAider AI"/>
   <Description DefaultValue="Ein Outlook-Add-in mit dem Ziel, E-Mails mithilfe eines intelligenten KI-Assistenten zu analysieren, bearbeiten oder automatisch zu beantworten."/>
   <IconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>
   <HighResolutionIconUrl DefaultValue="https://khaled-ayub.github.io/MailAider4.0/logo80.png"/>

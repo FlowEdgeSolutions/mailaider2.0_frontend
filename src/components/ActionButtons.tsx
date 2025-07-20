@@ -97,7 +97,7 @@ export function ActionButtons({ currentAction, onActionSelect, isConnected, isCo
                 size="sm"
                 className="flex-1 p-3 h-auto flex-col gap-1 relative transition-all duration-150 hover:scale-105 active:scale-95"
               >
-                <span role="img" aria-label="Korrigieren">✏️</span>
+                <Wand2 className="w-5 h-5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
