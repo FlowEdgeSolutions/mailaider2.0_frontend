@@ -20,6 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Settings2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 // 🧠 Einheitlicher Typ für alle Email-Daten
 interface EmailData {
@@ -41,9 +43,10 @@ interface MailAiderAppProps {
   forceComposeMode?: boolean;
 }
 
-function InlineSettings({ settings, onSettingsChange, disabled }: { settings: SettingsData; onSettingsChange: (s: SettingsData) => void; disabled?: boolean }) {
+function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { settings: SettingsData; onSettingsChange: (s: SettingsData) => void; disabled?: boolean; onExecute?: (prompt: string) => void }) {
+  const [userPrompt, setUserPrompt] = React.useState("");
   return (
-    <div className="card-modern p-4 space-y-5 animate-slide-up">
+    <div className="card-modern p-4 space-y-5 animate-slide-up bg-white dark:bg-zinc-900 shadow-md">
       <div className="flex items-center gap-3 mb-2">
         <div className="bg-blue-100 text-blue-600 rounded-full p-2">
           <Settings2 className="w-5 h-5" />
@@ -93,6 +96,33 @@ function InlineSettings({ settings, onSettingsChange, disabled }: { settings: Se
               <SelectItem value="französisch">Französisch</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
+      <div className="space-y-2 mt-4">
+        <label className="text-sm font-ui text-foreground">Zusätzliche Anweisungen (optional):</label>
+        <Textarea
+          value={userPrompt}
+          onChange={e => setUserPrompt(e.target.value)}
+          placeholder="Spezielle Wünsche oder Anpassungen..."
+          className="input-modern min-h-[100px] resize-none dark:border-border dark:bg-card dark:text-foreground"
+        />
+        <div className="flex gap-3 mt-2">
+          <Button
+            onClick={() => setUserPrompt("")}
+            variant="outline"
+            className="flex-1"
+            type="button"
+          >
+            Abbrechen
+          </Button>
+          <Button
+            onClick={() => onExecute && onExecute(userPrompt)}
+            className="flex-1 btn-primary"
+            type="button"
+            disabled={disabled}
+          >
+            Ausführen
+          </Button>
         </div>
       </div>
     </div>
@@ -241,7 +271,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               isLoading={isLoading}
               onComposeDataChange={update => setComposeData({ ...composeData, ...update })}
             />
-            <InlineSettings settings={settings} onSettingsChange={setSettings} disabled={isLoading} />
+            <InlineSettings settings={settings} onSettingsChange={setSettings} disabled={isLoading} onExecute={prompt => handleSettingsSubmit(prompt)} />
             <ChatInterface
               output={chatOutput}
               isLoading={isLoading}
