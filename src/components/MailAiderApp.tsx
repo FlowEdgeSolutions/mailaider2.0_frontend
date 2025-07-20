@@ -353,7 +353,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
             <InlineSettings settings={settings} onSettingsChange={setSettings} disabled={isLoading} onExecute={prompt => handleSettingsSubmit(prompt)} />
             <div className="flex gap-2 mb-4">
               <Button
-                variant={showCorrection ? "default" : "outline"}
+                variant="default"
                 className="flex-1 flex items-center gap-2"
                 onClick={() => handleSettingsSubmit("")}
                 type="button"
