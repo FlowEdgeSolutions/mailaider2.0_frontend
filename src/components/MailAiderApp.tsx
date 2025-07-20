@@ -90,6 +90,13 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   const effectiveConnected = devMode ? true : isConnected;
   const effectiveComposeMode = forceComposeMode !== undefined ? forceComposeMode : (devMode ? devComposeMode : isComposeMode);
 
+  // Setze currentAction auf 'verfassen', wenn Compose-Modus aktiv ist
+  React.useEffect(() => {
+    if (effectiveComposeMode && currentAction !== "verfassen") {
+      setCurrentAction("verfassen");
+    }
+  }, [effectiveComposeMode]);
+
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle("dark");
