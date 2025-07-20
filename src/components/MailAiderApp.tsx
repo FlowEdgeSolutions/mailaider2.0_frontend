@@ -133,10 +133,9 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
 function CorrectionPanel({ open, onClose, onExecute, disabled }: { open: boolean; onClose: () => void; onExecute: (mode: string, custom: string) => void; disabled?: boolean }) {
   const [mode, setMode] = React.useState("stilistisch");
   const [custom, setCustom] = React.useState("");
-  if (!open) return null;
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 opacity-100 backdrop-blur-sm bg-black/50`}> 
-      <div className={`bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transition-all duration-300 transform scale-100 translate-y-0 opacity-100`}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 ${open ? 'opacity-100 backdrop-blur-sm bg-black/50' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transition-all duration-300 transform ${open ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'}`}>
         <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -256,11 +255,6 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   const effectiveComposeMode = forceComposeMode !== undefined ? forceComposeMode : (devMode ? devComposeMode : isComposeMode);
 
   // Setze currentAction auf 'verfassen', wenn Compose-Modus aktiv ist
-  React.useEffect(() => {
-    if (effectiveComposeMode && currentAction !== "verfassen") {
-      setCurrentAction("verfassen");
-    }
-  }, [effectiveComposeMode, currentAction]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
