@@ -351,24 +351,6 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onComposeDataChange={update => setComposeData({ ...composeData, ...update })}
             />
             <InlineSettings settings={settings} onSettingsChange={setSettings} disabled={isLoading} onExecute={prompt => handleSettingsSubmit(prompt)} />
-            <div className="flex gap-2 mb-4">
-              <Button
-                variant="default"
-                className="flex-1 flex items-center gap-2"
-                onClick={() => handleSettingsSubmit("")}
-                type="button"
-              >
-                <span role="img" aria-label="Generieren">📝</span> E-Mail generieren
-              </Button>
-              <Button
-                variant={showCorrection ? "default" : "outline"}
-                className="flex-1 flex items-center gap-2"
-                onClick={() => setShowCorrection(v => !v)}
-                type="button"
-              >
-                <span role="img" aria-label="Korrigieren">✏️</span> Mail korrigieren
-              </Button>
-            </div>
             <CorrectionPanel
               open={showCorrection}
               onClose={() => setShowCorrection(false)}
@@ -396,6 +378,24 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onCopy={handleCopyToClipboard}
               onInsertReply={handleInsertReply}
             />
+            <div className="card-modern p-4 flex gap-2 mt-4 animate-bounce-in">
+              <Button
+                variant="default"
+                className="flex-1 flex items-center gap-2 justify-center"
+                onClick={() => handleSettingsSubmit("")}
+                type="button"
+              >
+                <span role="img" aria-label="Generieren">📝</span> E-Mail generieren
+              </Button>
+              <Button
+                variant={showCorrection ? "default" : "outline"}
+                className="flex-1 flex items-center gap-2 justify-center"
+                onClick={() => setShowCorrection(v => !v)}
+                type="button"
+              >
+                <span role="img" aria-label="Korrigieren">✏️</span> Mail korrigieren
+              </Button>
+            </div>
             <ActionButtons
               currentAction={currentAction}
               onActionSelect={handleActionSelect}
