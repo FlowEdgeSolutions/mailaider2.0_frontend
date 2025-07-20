@@ -33,7 +33,12 @@ interface SettingsData {
   language: string;
 }
 
-export function MailAiderApp() {
+interface MailAiderAppProps {
+  emailData?: EmailData;
+  forceComposeMode?: boolean;
+}
+
+export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: MailAiderAppProps) {
   const devMode = false;            // Prod-Modus
   const devComposeMode = false;
 
@@ -83,7 +88,7 @@ export function MailAiderApp() {
   const isLoading = officeLoading || aiLoading;
 
   const effectiveConnected = devMode ? true : isConnected;
-  const effectiveComposeMode = devMode ? devComposeMode : isComposeMode;
+  const effectiveComposeMode = forceComposeMode !== undefined ? forceComposeMode : (devMode ? devComposeMode : isComposeMode);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -129,8 +134,8 @@ export function MailAiderApp() {
 
   // 📦 Sichere Zusammenführung mit Fallback für summary
   const emailData: EmailData = {
-    ...rawEmailData,
-    summary: rawEmailData.summary ?? "",
+    ...(emailDataProp || rawEmailData),
+    summary: (emailDataProp?.summary ?? rawEmailData.summary) ?? "",
   };
 
   const setEmailData = (data: EmailData) => {

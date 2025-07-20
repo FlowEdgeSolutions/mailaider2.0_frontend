@@ -37,7 +37,7 @@ const Index = () => {
     return <ModernLoading stage="thinking" message="Outlook wird initialisiert..." />;
   }
 
-  return composeMode ? <ComposeEditor /> : <MailAiderApp emailData={emailData} />;
+  return <MailAiderApp emailData={emailData} forceComposeMode={composeMode} />;
 };
 
 export default Index;
