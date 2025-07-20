@@ -135,45 +135,62 @@ function CorrectionPanel({ open, onClose, onExecute, disabled }: { open: boolean
   const [custom, setCustom] = React.useState("");
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white dark:bg-[#0a1736] rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-orange-100 text-orange-600 rounded-full p-2">
-              <Pencil className="w-5 h-5" />
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 opacity-100 backdrop-blur-sm bg-black/50`}> 
+      <div className={`bg-card rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transition-all duration-300 transform scale-100 translate-y-0 opacity-100`}>
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-200 to-orange-400 rounded-lg flex items-center justify-center">
+                <Pencil className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-display text-foreground">Mail korrigieren</h2>
             </div>
-            <span className="font-bold text-xl text-foreground dark:text-white">Mail korrigieren</span>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-150 hover:scale-105"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-muted/60 dark:hover:bg-zinc-800 transition-colors">
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
         </div>
-        <div className="space-y-4">
-          <div>
-            <Label className="mb-1 block dark:text-white">Korrekturart:</Label>
+        <div className="p-6 space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-ui text-foreground">Korrekturart:</label>
             <Select value={mode} onValueChange={setMode}>
-              <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
-                <SelectValue placeholder="Korrektur wählen..." className="dark:text-white/80" />
+              <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary dark:border-border dark:bg-card">
+                <SelectValue />
               </SelectTrigger>
-              <SelectContent className="dark:bg-[#0a1736] dark:text-white">
-                <SelectItem value="stilistisch">Stilistisch & sprachlich</SelectItem>
-                <SelectItem value="rechtschreibung">Nur Rechtschreibung</SelectItem>
-                <SelectItem value="umformulieren">Höflich umformulieren</SelectItem>
+              <SelectContent className="bg-surface border-2 border-border shadow-lg dark:bg-card dark:border-border">
+                <SelectItem value="stilistisch" className="hover:bg-accent focus:bg-accent text-foreground">Stilistisch & sprachlich</SelectItem>
+                <SelectItem value="rechtschreibung" className="hover:bg-accent focus:bg-accent text-foreground">Nur Rechtschreibung</SelectItem>
+                <SelectItem value="umformulieren" className="hover:bg-accent focus:bg-accent text-foreground">Höflich umformulieren</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label className="mb-1 block dark:text-white">Zusätzliche Wünsche (optional):</Label>
+          <div className="space-y-2">
+            <label className="text-sm font-ui text-foreground">Zusätzliche Wünsche (optional):</label>
             <Textarea
               value={custom}
               onChange={e => setCustom(e.target.value)}
               placeholder="z.B. besonders höflich, kurz halten, ..."
-              className="input-modern min-h-[80px] resize-none dark:border-zinc-700 dark:bg-[#0a1736] dark:text-white"
+              className="input-modern min-h-[80px] resize-none dark:border-border dark:bg-card dark:text-foreground"
             />
           </div>
-          <div className="flex gap-3 mt-2">
-            <Button onClick={onClose} variant="outline" className="flex-1" type="button">Abbrechen</Button>
-            <Button onClick={() => onExecute(mode, custom)} className="flex-1 btn-primary" type="button" disabled={disabled}>Ausführen</Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="flex-1"
+            >
+              Abbrechen
+            </Button>
+            <Button
+              onClick={() => onExecute(mode, custom)}
+              className="flex-1 btn-primary"
+              disabled={disabled}
+            >
+              Ausführen
+            </Button>
           </div>
         </div>
       </div>
