@@ -61,33 +61,41 @@ export function EmailViewer({
         </div>
       )}
 
-      <div className="space-y-2">
-        <Button
-          onClick={onToggleSummary}
-          variant="outline"
-          size="sm"
-          className="w-full transition-all duration-300 hover:scale-105"
-          disabled={isLoading}
-        >
-          {showSummary ? (
-            <>
-              <ChevronUp className="w-4 h-4 mr-2" />
-              Zusammenfassung verbergen
-            </>
-          ) : (
-            <>
-              <ChevronDown className="w-4 h-4 mr-2" />
-              Zusammenfassung anzeigen
-            </>
-          )}
-        </Button>
-
-        {showFullContent && (
-          <div className="text-sm font-body text-foreground/90 bg-muted p-3 rounded-lg whitespace-pre-line border border-border animate-fade-in">
-            {emailData.content}
-          </div>
+      <Button
+        onClick={onToggleSummary}
+        variant="outline"
+        size="sm"
+        className="w-full transition-all duration-300 hover:scale-105"
+        disabled={isLoading}
+      >
+        {showSummary ? (
+          <>
+            <ChevronUp className="w-4 h-4 mr-2" />
+            Zusammenfassung verbergen
+          </>
+        ) : (
+          <>
+            <ChevronDown className="w-4 h-4 mr-2" />
+            Zusammenfassung anzeigen
+          </>
         )}
-      </div>
+      </Button>
+
+      <Button
+        onClick={() => setShowFullContent(v => !v)}
+        variant="ghost"
+        size="sm"
+        className="w-full text-xs text-muted-foreground"
+        style={{ marginTop: 0 }}
+      >
+        {showFullContent ? 'E-Mail-Inhalt verbergen' : 'E-Mail-Inhalt anzeigen'}
+      </Button>
+
+      {showFullContent && (
+        <div className="text-sm font-body text-foreground/90 bg-muted p-3 rounded-lg whitespace-pre-line border border-border animate-fade-in">
+          {emailData.content}
+        </div>
+      )}
     </div>
   );
 }

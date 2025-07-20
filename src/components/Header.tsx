@@ -17,8 +17,7 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
         <div className="flex items-center gap-3 min-w-0">
           <img src={mailAiderLogo} alt="MailAider Logo" className="w-9 h-9" />
           <div>
-            <h1 className="text-lg font-display text-gradient-primary leading-tight">MailAider AI</h1>
-            <p className="text-xs font-body text-muted-foreground leading-snug break-words whitespace-normal">Intelligenter E-Mail-Assistent</p>
+            <h1 className="text-base font-display text-gradient-primary leading-tight">MailAider AI</h1>
           </div>
         </div>
         <div className="flex items-center gap-1 ml-2">
