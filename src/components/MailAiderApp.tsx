@@ -46,21 +46,21 @@ interface MailAiderAppProps {
 function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { settings: SettingsData; onSettingsChange: (s: SettingsData) => void; disabled?: boolean; onExecute?: (prompt: string) => void }) {
   const [userPrompt, setUserPrompt] = React.useState("");
   return (
-    <div className="card-modern p-4 space-y-5 animate-slide-up bg-white dark:bg-zinc-900 shadow-md">
+    <div className="card-modern p-4 space-y-5 animate-slide-up bg-white dark:bg-[#0a1736] shadow-md">
       <div className="flex items-center gap-3 mb-2">
         <div className="bg-blue-100 text-blue-600 rounded-full p-2">
           <Settings2 className="w-5 h-5" />
         </div>
-        <span className="font-bold text-lg text-foreground">E-Mail-Einstellungen</span>
+        <span className="font-bold text-lg text-foreground dark:text-white">E-Mail-Einstellungen</span>
       </div>
       <div className="space-y-4">
         <div>
-          <Label className="mb-1 block">Tonfall:</Label>
+          <Label className="mb-1 block dark:text-white">Tonfall:</Label>
           <Select value={settings.tone} onValueChange={v => onSettingsChange({ ...settings, tone: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-zinc-900">
-              <SelectValue placeholder="Tonfall wählen..." />
+            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+              <SelectValue placeholder="Tonfall wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
               <SelectItem value="formell">Formell</SelectItem>
               <SelectItem value="informell">Informell</SelectItem>
               <SelectItem value="neutral">Neutral</SelectItem>
@@ -68,24 +68,24 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
           </Select>
         </div>
         <div>
-          <Label className="mb-1 block">Anrede:</Label>
+          <Label className="mb-1 block dark:text-white">Anrede:</Label>
           <Select value={settings.greeting} onValueChange={v => onSettingsChange({ ...settings, greeting: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-zinc-900">
-              <SelectValue placeholder="Anrede wählen..." />
+            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+              <SelectValue placeholder="Anrede wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
               <SelectItem value="informell">Du (informell)</SelectItem>
               <SelectItem value="formell">Sie (formell)</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label className="mb-1 block">Länge:</Label>
+          <Label className="mb-1 block dark:text-white">Länge:</Label>
           <Select value={settings.length} onValueChange={v => onSettingsChange({ ...settings, length: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-zinc-900">
-              <SelectValue placeholder="Länge wählen..." />
+            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+              <SelectValue placeholder="Länge wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
               <SelectItem value="kurz">Kurz</SelectItem>
               <SelectItem value="mittel">Mittel</SelectItem>
               <SelectItem value="lang">Lang</SelectItem>
@@ -93,12 +93,12 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
           </Select>
         </div>
         <div>
-          <Label className="mb-1 block">Sprache:</Label>
+          <Label className="mb-1 block dark:text-white">Sprache:</Label>
           <Select value={settings.language} onValueChange={v => onSettingsChange({ ...settings, language: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-zinc-900">
-              <SelectValue placeholder="Sprache wählen..." />
+            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+              <SelectValue placeholder="Sprache wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
               <SelectItem value="deutsch">Deutsch</SelectItem>
               <SelectItem value="englisch">Englisch</SelectItem>
               <SelectItem value="französisch">Französisch</SelectItem>
@@ -107,12 +107,12 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         </div>
       </div>
       <div className="space-y-2 mt-4">
-        <label className="text-sm font-ui text-foreground">Zusätzliche Anweisungen (optional):</label>
+        <label className="text-sm font-ui text-foreground dark:text-white">Zusätzliche Anweisungen (optional):</label>
         <Textarea
           value={userPrompt}
           onChange={e => setUserPrompt(e.target.value)}
           placeholder="Spezielle Wünsche oder Anpassungen..."
-          className="input-modern min-h-[100px] resize-none dark:border-border dark:bg-card dark:text-foreground"
+          className="input-modern min-h-[100px] resize-none dark:border-zinc-700 dark:bg-[#0a1736] dark:text-white"
         />
         <div className="flex gap-3 mt-2">
           <Button
