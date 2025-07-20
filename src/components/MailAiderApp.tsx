@@ -19,6 +19,7 @@ import ComposeEditor from "./ComposeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Settings2 } from "lucide-react";
 
 // 🧠 Einheitlicher Typ für alle Email-Daten
 interface EmailData {
@@ -42,10 +43,16 @@ interface MailAiderAppProps {
 
 function InlineSettings({ settings, onSettingsChange, disabled }: { settings: SettingsData; onSettingsChange: (s: SettingsData) => void; disabled?: boolean }) {
   return (
-    <div className="card-modern p-4 space-y-3 animate-slide-up">
-      <div className="grid grid-cols-2 gap-3">
+    <div className="card-modern p-4 space-y-5 animate-slide-up">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="bg-blue-100 text-blue-600 rounded-full p-2">
+          <Settings2 className="w-5 h-5" />
+        </div>
+        <span className="font-bold text-lg text-foreground">E-Mail-Einstellungen</span>
+      </div>
+      <div className="space-y-4">
         <div>
-          <Label>Tonfall</Label>
+          <Label className="mb-1 block">Tonfall:</Label>
           <Select value={settings.tone} onValueChange={v => onSettingsChange({ ...settings, tone: v })} disabled={disabled}>
             <SelectTrigger />
             <SelectContent>
@@ -56,7 +63,7 @@ function InlineSettings({ settings, onSettingsChange, disabled }: { settings: Se
           </Select>
         </div>
         <div>
-          <Label>Anrede</Label>
+          <Label className="mb-1 block">Anrede:</Label>
           <Select value={settings.greeting} onValueChange={v => onSettingsChange({ ...settings, greeting: v })} disabled={disabled}>
             <SelectTrigger />
             <SelectContent>
@@ -66,7 +73,7 @@ function InlineSettings({ settings, onSettingsChange, disabled }: { settings: Se
           </Select>
         </div>
         <div>
-          <Label>Länge</Label>
+          <Label className="mb-1 block">Länge:</Label>
           <Select value={settings.length} onValueChange={v => onSettingsChange({ ...settings, length: v })} disabled={disabled}>
             <SelectTrigger />
             <SelectContent>
@@ -77,7 +84,7 @@ function InlineSettings({ settings, onSettingsChange, disabled }: { settings: Se
           </Select>
         </div>
         <div>
-          <Label>Sprache</Label>
+          <Label className="mb-1 block">Sprache:</Label>
           <Select value={settings.language} onValueChange={v => onSettingsChange({ ...settings, language: v })} disabled={disabled}>
             <SelectTrigger />
             <SelectContent>
