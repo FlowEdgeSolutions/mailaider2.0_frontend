@@ -355,6 +355,14 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               <Button
                 variant={showCorrection ? "default" : "outline"}
                 className="flex-1 flex items-center gap-2"
+                onClick={() => handleSettingsSubmit("")}
+                type="button"
+              >
+                <span role="img" aria-label="Generieren">📝</span> E-Mail generieren
+              </Button>
+              <Button
+                variant={showCorrection ? "default" : "outline"}
+                className="flex-1 flex items-center gap-2"
                 onClick={() => setShowCorrection(v => !v)}
                 type="button"
               >
