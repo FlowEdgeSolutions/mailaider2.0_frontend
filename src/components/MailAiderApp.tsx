@@ -58,10 +58,10 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block dark:text-white">Tonfall:</Label>
           <Select value={settings.tone} onValueChange={v => onSettingsChange({ ...settings, tone: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+            <SelectTrigger className="bg-white dark:bg-card">
               <SelectValue placeholder="Tonfall wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
+            <SelectContent className="bg-white dark:bg-card">
               <SelectItem value="formell">Formell</SelectItem>
               <SelectItem value="informell">Informell</SelectItem>
               <SelectItem value="neutral">Neutral</SelectItem>
@@ -71,10 +71,10 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block dark:text-white">Anrede:</Label>
           <Select value={settings.greeting} onValueChange={v => onSettingsChange({ ...settings, greeting: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+            <SelectTrigger className="bg-white dark:bg-card">
               <SelectValue placeholder="Anrede wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
+            <SelectContent className="bg-white dark:bg-card">
               <SelectItem value="informell">Du (informell)</SelectItem>
               <SelectItem value="formell">Sie (formell)</SelectItem>
             </SelectContent>
@@ -83,10 +83,10 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block dark:text-white">Länge:</Label>
           <Select value={settings.length} onValueChange={v => onSettingsChange({ ...settings, length: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+            <SelectTrigger className="bg-white dark:bg-card">
               <SelectValue placeholder="Länge wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
+            <SelectContent className="bg-white dark:bg-card">
               <SelectItem value="kurz">Kurz</SelectItem>
               <SelectItem value="mittel">Mittel</SelectItem>
               <SelectItem value="lang">Lang</SelectItem>
@@ -96,10 +96,10 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         <div>
           <Label className="mb-1 block dark:text-white">Sprache:</Label>
           <Select value={settings.language} onValueChange={v => onSettingsChange({ ...settings, language: v })} disabled={disabled}>
-            <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+            <SelectTrigger className="bg-white dark:bg-card">
               <SelectValue placeholder="Sprache wählen..." className="dark:text-white/80" />
             </SelectTrigger>
-            <SelectContent className="dark:bg-[#0a1736] dark:text-white">
+            <SelectContent className="bg-white dark:bg-card">
               <SelectItem value="deutsch">Deutsch</SelectItem>
               <SelectItem value="englisch">Englisch</SelectItem>
               <SelectItem value="französisch">Französisch</SelectItem>
@@ -157,10 +157,10 @@ function CorrectionPanel({ open, onClose, onExecute, disabled }: { open: boolean
           <div className="space-y-2">
             <label className="text-sm font-ui text-foreground">Korrekturart:</label>
             <Select value={mode} onValueChange={setMode}>
-              <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary dark:border-border dark:bg-card">
+              <SelectTrigger className="input-modern bg-white dark:bg-card border-2 border-border hover:border-primary/50 focus:border-primary dark:border-border">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-surface border-2 border-border shadow-lg dark:bg-card dark:border-border">
+              <SelectContent className="bg-white dark:bg-card border-2 border-border shadow-lg dark:border-border">
                 <SelectItem value="stilistisch" className="hover:bg-accent focus:bg-accent text-foreground">Stilistisch & sprachlich</SelectItem>
                 <SelectItem value="rechtschreibung" className="hover:bg-accent focus:bg-accent text-foreground">Nur Rechtschreibung</SelectItem>
                 <SelectItem value="umformulieren" className="hover:bg-accent focus:bg-accent text-foreground">Höflich umformulieren</SelectItem>
