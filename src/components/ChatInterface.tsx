@@ -94,8 +94,7 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
             <Copy className="w-4 h-4 mr-2" />
             Kopieren
           </Button>
-          
-          {currentAction === 'antworten' && (
+          {(currentAction === 'antworten' || currentAction === 'verfassen') && (
             <Button
               onClick={onInsertReply}
               size="sm"

@@ -116,14 +116,6 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
         />
         <div className="flex gap-3 mt-2">
           <Button
-            onClick={() => setUserPrompt("")}
-            variant="outline"
-            className="flex-1"
-            type="button"
-          >
-            Abbrechen
-          </Button>
-          <Button
             onClick={() => onExecute && onExecute(userPrompt)}
             className="flex-1 btn-primary"
             type="button"
@@ -236,7 +228,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   };
 
   const handleInsertReply = () => {
-    insertReply(chatOutput, effectiveComposeMode);
+    insertReply(chatOutput, effectiveComposeMode, composeData);
   };
 
   // 📦 Sichere Zusammenführung mit Fallback für summary

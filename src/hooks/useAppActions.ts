@@ -19,13 +19,26 @@ export function useAppActions() {
   };
 
   /* ---------- Einfügen -------------------------------------- */
-  const insertReply = async (chatOutput: string, isComposeMode: boolean) => {
+  const insertReply = async (chatOutput: string, isComposeMode: boolean, composeData?: { to: string[]; subject: string }) => {
     try {
       if (isComposeMode) {
+        // Setze Empfänger
+        if (composeData?.to && composeData.to.length > 0 && window.Office?.context?.mailbox?.item?.to?.setAsync) {
+          await new Promise<void>(resolve => {
+            window.Office.context.mailbox.item.to.setAsync(composeData.to, () => resolve());
+          });
+        }
+        // Setze Betreff
+        if (composeData?.subject && window.Office?.context?.mailbox?.item?.subject?.setAsync) {
+          await new Promise<void>(resolve => {
+            window.Office.context.mailbox.item.subject.setAsync(composeData.subject, () => resolve());
+          });
+        }
+        // Füge Text ein
         await outlookService.insertComposeText(chatOutput);
         setStatusMessage("Text wurde in die E-Mail eingefügt");
       } else {
-        await outlookService.insertReplyText(chatOutput);   // ohne ?.
+        await outlookService.insertReplyText(chatOutput);
         setStatusMessage("Antwort wurde in das Antwortformular eingefügt");
       }
     } catch (error) {
