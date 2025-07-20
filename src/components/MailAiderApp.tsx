@@ -19,7 +19,7 @@ import ComposeEditor from "./ComposeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Settings2, X, Pencil } from "lucide-react";
+import { Settings2, X, Wand2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -141,7 +141,7 @@ function CorrectionPanel({ open, onClose, onExecute, disabled }: { open: boolean
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-orange-200 to-orange-400 rounded-lg flex items-center justify-center">
-                <Pencil className="w-5 h-5 text-white" />
+                <Wand2 className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-xl font-display text-foreground">Mail korrigieren</h2>
             </div>
