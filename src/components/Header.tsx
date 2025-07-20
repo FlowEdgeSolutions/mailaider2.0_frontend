@@ -1,5 +1,5 @@
 import React from 'react';
-import { Moon, Sun, Wifi, WifiOff } from 'lucide-react';
+import { Moon, Sun, Wifi, WifiOff, HelpCircle } from 'lucide-react';
 import mailAiderLogo from '../assets/mailaider-logo.png';
 
 interface HeaderProps {
@@ -7,9 +7,10 @@ interface HeaderProps {
   onToggleDarkMode: () => void;
   isConnected: boolean;
   onStatusClick: () => void;
+  onTutorialClick?: () => void;
 }
 
-export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClick }: HeaderProps) {
+export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClick, onTutorialClick }: HeaderProps) {
   return (
     <div className="card-modern p-4 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -34,7 +35,6 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
           >
             {isConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
           </button>
-          
           <button
             onClick={onToggleDarkMode}
             className="w-9 h-9 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-300 hover:scale-105"
@@ -42,6 +42,16 @@ export function Header({ isDarkMode, onToggleDarkMode, isConnected, onStatusClic
           >
             {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
+          {onTutorialClick && (
+            <button
+              onClick={onTutorialClick}
+              className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-primary/10 focus:outline-none"
+              title="Tutorial starten"
+              style={{marginLeft: 2}}
+            >
+              <HelpCircle className="w-5 h-5 text-primary" />
+            </button>
+          )}
         </div>
       </div>
     </div>

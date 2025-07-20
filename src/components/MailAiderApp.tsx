@@ -351,31 +351,12 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   return (
     <div className={`min-h-screen bg-background-secondary transition-all duration-500 ${isDarkMode ? "dark" : ""}`}>
       <div className="max-w-md mx-auto p-3 space-y-3">
-        {/* Tutorial-Button oben rechts */}
-        <div className="flex justify-end mb-2">
-          {effectiveComposeMode ? (
-            <button
-              onClick={() => setForceShowComposeTutorial(true)}
-              className="w-9 h-9 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-300 hover:scale-105"
-              title="Tutorial starten"
-            >
-              <HelpCircle className="w-5 h-5 text-primary" />
-            </button>
-          ) : (
-            <button
-              onClick={() => setForceShowReadTutorial(true)}
-              className="w-9 h-9 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-300 hover:scale-105"
-              title="Tutorial starten"
-            >
-              <HelpCircle className="w-5 h-5 text-primary" />
-            </button>
-          )}
-        </div>
         <Header
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
           isConnected={effectiveConnected}
           onStatusClick={showDsgvoInfo}
+          onTutorialClick={effectiveComposeMode ? () => setForceShowComposeTutorial(true) : () => setForceShowReadTutorial(true)}
         />
 
         {!effectiveConnected && (

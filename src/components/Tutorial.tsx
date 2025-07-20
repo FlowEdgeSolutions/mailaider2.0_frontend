@@ -56,6 +56,7 @@ const tutorialSteps = [
 export function Tutorial({ isVisible, onComplete, onSkip }: TutorialProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [highlightedElement, setHighlightedElement] = useState<Element | null>(null);
+  const [spotlightRect, setSpotlightRect] = useState<{left: number, top: number, width: number, height: number} | null>(null);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -64,8 +65,20 @@ export function Tutorial({ isVisible, onComplete, onSkip }: TutorialProps) {
     if (step.target) {
       const element = document.querySelector(step.target);
       setHighlightedElement(element);
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        setSpotlightRect({
+          left: rect.left - 8,
+          top: rect.top - 8,
+          width: rect.width + 16,
+          height: rect.height + 16
+        });
+      } else {
+        setSpotlightRect(null);
+      }
     } else {
       setHighlightedElement(null);
+      setSpotlightRect(null);
     }
   }, [currentStep, isVisible]);
 
@@ -144,26 +157,44 @@ export function Tutorial({ isVisible, onComplete, onSkip }: TutorialProps) {
 
   return (
     <div className="fixed inset-0 z-[9999] pointer-events-none">
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto" />
-      
-      {/* Highlight spotlight */}
-      {highlightedElement && (
+      {/* SVG Spotlight Overlay */}
+      {spotlightRect ? (
+        <svg className="absolute inset-0 w-full h-full pointer-events-auto" style={{zIndex: 1}}>
+          <defs>
+            <mask id="spotlight-mask">
+              <rect x="0" y="0" width="100%" height="100%" fill="white" />
+              <rect
+                x={spotlightRect.left}
+                y={spotlightRect.top}
+                width={spotlightRect.width}
+                height={spotlightRect.height}
+                rx="18" ry="18"
+                fill="black"
+              />
+            </mask>
+          </defs>
+          <rect x="0" y="0" width="100%" height="100%" fill="black" fillOpacity="0.6" mask="url(#spotlight-mask)" />
+        </svg>
+      ) : (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto" style={{zIndex: 1}} />
+      )}
+      {/* Highlight spotlight (Rahmen) */}
+      {spotlightRect && (
         <div
-          className="absolute bg-white/10 border-2 border-primary/50 rounded-xl pointer-events-none animate-pulse-glow"
+          className="absolute border-2 border-primary/50 rounded-xl pointer-events-none animate-pulse-glow"
           style={{
-            left: highlightedElement.getBoundingClientRect().left - 8,
-            top: highlightedElement.getBoundingClientRect().top - 8,
-            width: highlightedElement.getBoundingClientRect().width + 16,
-            height: highlightedElement.getBoundingClientRect().height + 16,
+            left: spotlightRect.left,
+            top: spotlightRect.top,
+            width: spotlightRect.width,
+            height: spotlightRect.height,
+            zIndex: 2
           }}
         />
       )}
-
       {/* Tutorial tooltip */}
       <div
         className={`absolute w-80 pointer-events-auto ${getTooltipPosition()}`}
-        style={getTooltipStyle()}
+        style={{...getTooltipStyle(), zIndex: 3}}
       >
         <div className="bg-card rounded-2xl shadow-2xl border border-border p-6 animate-bounce-in">
           {/* Header */}
