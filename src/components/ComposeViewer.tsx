@@ -37,7 +37,7 @@ export function ComposeViewer({ composeData, isLoading, onComposeDataChange }: C
         <Input
           type="text"
           placeholder="Betreff eingeben..."
-          value={composeData.subject}
+          value={typeof composeData.subject === 'string' ? composeData.subject : ''}
           onChange={e => onComposeDataChange && onComposeDataChange({ subject: e.target.value })}
           className="input-modern"
           disabled={isLoading}
