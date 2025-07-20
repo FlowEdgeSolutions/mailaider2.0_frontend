@@ -238,7 +238,8 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     generateSummary,
   } = useAIProcessing();
 
-  const { showTutorial, handleTutorialComplete, handleTutorialSkip } = useTutorial();
+  const { showTutorial: showReadTutorial, handleTutorialComplete: handleReadTutorialComplete, handleTutorialSkip: handleReadTutorialSkip } = useTutorial('read');
+  const { showTutorial: showComposeTutorial, handleTutorialComplete: handleComposeTutorialComplete, handleTutorialSkip: handleComposeTutorialSkip } = useTutorial('compose');
 
   const {
     showStatusPopup,
@@ -417,6 +418,11 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onSettingsChange={setSettings}
               onSubmit={handleSettingsSubmit}
             />
+            <Tutorial
+              isVisible={showComposeTutorial}
+              onComplete={handleComposeTutorialComplete}
+              onSkip={handleComposeTutorialSkip}
+            />
           </>
         ) : (
           <>
@@ -447,6 +453,11 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onSettingsChange={setSettings}
               onSubmit={handleSettingsSubmit}
             />
+            <Tutorial
+              isVisible={showReadTutorial}
+              onComplete={handleReadTutorialComplete}
+              onSkip={handleReadTutorialSkip}
+            />
           </>
         )}
 
@@ -454,12 +465,6 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
           isOpen={showStatusPopup}
           message={statusMessage}
           onClose={() => setShowStatusPopup(false)}
-        />
-
-        <Tutorial
-          isVisible={showTutorial}
-          onComplete={handleTutorialComplete}
-          onSkip={handleTutorialSkip}
         />
 
         <Toaster />
