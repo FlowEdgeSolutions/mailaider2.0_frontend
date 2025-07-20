@@ -377,30 +377,14 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               currentAction={currentAction}
               onCopy={handleCopyToClipboard}
               onInsertReply={handleInsertReply}
+              onCorrectionClick={() => setShowCorrection(true)}
             />
-            <div className="card-modern p-4 flex gap-2 mt-4 animate-bounce-in">
-              <Button
-                variant="default"
-                className="flex-1 flex items-center gap-2 justify-center"
-                onClick={() => handleSettingsSubmit("")}
-                type="button"
-              >
-                <span role="img" aria-label="Generieren">📝</span> E-Mail generieren
-              </Button>
-              <Button
-                variant={showCorrection ? "default" : "outline"}
-                className="flex-1 flex items-center gap-2 justify-center"
-                onClick={() => setShowCorrection(v => !v)}
-                type="button"
-              >
-                <span role="img" aria-label="Korrigieren">✏️</span> Mail korrigieren
-              </Button>
-            </div>
             <ActionButtons
               currentAction={currentAction}
               onActionSelect={handleActionSelect}
               isConnected={effectiveConnected}
               isComposeMode={effectiveComposeMode}
+              onCorrectionClick={() => setShowCorrection(true)}
             />
             <SettingsModal
               isOpen={isSettingsOpen}

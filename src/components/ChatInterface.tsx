@@ -9,9 +9,10 @@ interface ChatInterfaceProps {
   currentAction: string;
   onCopy: () => void;
   onInsertReply: () => void;
+  onCorrectionClick?: () => void;
 }
 
-export function ChatInterface({ output, isLoading, currentAction, onCopy, onInsertReply }: ChatInterfaceProps) {
+export function ChatInterface({ output, isLoading, currentAction, onCopy, onInsertReply, onCorrectionClick }: ChatInterfaceProps) {
   const [loadingStage, setLoadingStage] = useState<'thinking' | 'processing' | 'generating'>('thinking');
   const [loadingMessage, setLoadingMessage] = useState('');
   const [showOutput, setShowOutput] = useState(false);
@@ -95,14 +96,26 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
             Kopieren
           </Button>
           {(currentAction === 'antworten' || currentAction === 'verfassen') && (
-            <Button
-              onClick={onInsertReply}
-              size="sm"
-              className="flex-1 btn-primary transition-all duration-300 hover:scale-105"
-            >
-              <Send className="w-4 h-4 mr-2" />
-              Einfügen
-            </Button>
+            <>
+              <Button
+                onClick={onInsertReply}
+                size="sm"
+                className="flex-1 btn-primary transition-all duration-300 hover:scale-105"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Einfügen
+              </Button>
+              {currentAction === 'verfassen' && onCorrectionClick && (
+                <Button
+                  onClick={onCorrectionClick}
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 transition-all duration-300 hover:scale-105"
+                >
+                  <span role="img" aria-label="Korrigieren">✏️</span> Mail korrigieren
+                </Button>
+              )}
+            </>
           )}
         </div>
       )}

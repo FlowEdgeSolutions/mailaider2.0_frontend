@@ -8,9 +8,10 @@ interface ActionButtonsProps {
   onActionSelect: (action: string) => void;
   isConnected: boolean;
   isComposeMode?: boolean;
+  onCorrectionClick?: () => void;
 }
 
-export function ActionButtons({ currentAction, onActionSelect, isConnected, isComposeMode = false }: ActionButtonsProps) {
+export function ActionButtons({ currentAction, onActionSelect, isConnected, isComposeMode = false, onCorrectionClick }: ActionButtonsProps) {
   const readModeActions = [
     {
       id: 'antworten',
@@ -86,6 +87,25 @@ export function ActionButtons({ currentAction, onActionSelect, isConnected, isCo
             </Tooltip>
           );
         })}
+        {isComposeMode && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={onCorrectionClick}
+                disabled={!isConnected}
+                variant="outline"
+                size="sm"
+                className="flex-1 p-3 h-auto flex-col gap-1 relative transition-all duration-150 hover:scale-105 active:scale-95"
+              >
+                <span role="img" aria-label="Korrigieren">✏️</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              Mail korrigieren
+              <div className="text-xs mt-1 text-muted-foreground">E-Mail stilistisch, sprachlich oder orthografisch korrigieren</div>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
     </div>
   );
