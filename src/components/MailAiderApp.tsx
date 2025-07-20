@@ -19,7 +19,7 @@ import ComposeEditor from "./ComposeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Settings2, X, Wand2 } from "lucide-react";
+import { Settings, X, Wand2, HelpCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -50,7 +50,7 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
     <div className="card-modern p-4 space-y-5 animate-slide-up bg-white dark:bg-[#0a1736] shadow-md">
       <div className="flex items-center gap-3 mb-2">
         <div className="bg-blue-100 text-blue-600 rounded-full p-2">
-          <Settings2 className="w-5 h-5" />
+          <Settings className="w-5 h-5" />
         </div>
         <span className="font-bold text-lg text-foreground dark:text-white">E-Mail-Einstellungen</span>
       </div>
@@ -139,8 +139,8 @@ function CorrectionPanel({ open, onClose, onExecute, disabled }: { open: boolean
         <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-200 to-orange-400 rounded-lg flex items-center justify-center">
-                <Wand2 className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-400 rounded-lg flex items-center justify-center">
+                <Settings className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-xl font-display text-foreground">Mail korrigieren</h2>
             </div>
@@ -237,6 +237,10 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     processEmailWithAI,
     generateSummary,
   } = useAIProcessing();
+
+  // Tutorial-Flags manuell setzen
+  const [forceShowReadTutorial, setForceShowReadTutorial] = useState(false);
+  const [forceShowComposeTutorial, setForceShowComposeTutorial] = useState(false);
 
   const { showTutorial: showReadTutorial, handleTutorialComplete: handleReadTutorialComplete, handleTutorialSkip: handleReadTutorialSkip } = useTutorial('read');
   const { showTutorial: showComposeTutorial, handleTutorialComplete: handleComposeTutorialComplete, handleTutorialSkip: handleComposeTutorialSkip } = useTutorial('compose');
@@ -347,6 +351,26 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   return (
     <div className={`min-h-screen bg-background-secondary transition-all duration-500 ${isDarkMode ? "dark" : ""}`}>
       <div className="max-w-md mx-auto p-3 space-y-3">
+        {/* Tutorial-Button oben rechts */}
+        <div className="flex justify-end mb-2">
+          {effectiveComposeMode ? (
+            <button
+              onClick={() => setForceShowComposeTutorial(true)}
+              className="w-9 h-9 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-300 hover:scale-105"
+              title="Tutorial starten"
+            >
+              <HelpCircle className="w-5 h-5 text-primary" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setForceShowReadTutorial(true)}
+              className="w-9 h-9 rounded-lg bg-accent hover:bg-accent/80 flex items-center justify-center transition-all duration-300 hover:scale-105"
+              title="Tutorial starten"
+            >
+              <HelpCircle className="w-5 h-5 text-primary" />
+            </button>
+          )}
+        </div>
         <Header
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
@@ -419,9 +443,9 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onSubmit={handleSettingsSubmit}
             />
             <Tutorial
-              isVisible={showComposeTutorial}
-              onComplete={handleComposeTutorialComplete}
-              onSkip={handleComposeTutorialSkip}
+              isVisible={showComposeTutorial || forceShowComposeTutorial}
+              onComplete={() => { setForceShowComposeTutorial(false); handleComposeTutorialComplete(); }}
+              onSkip={() => { setForceShowComposeTutorial(false); handleComposeTutorialSkip(); }}
             />
           </>
         ) : (
@@ -454,9 +478,9 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onSubmit={handleSettingsSubmit}
             />
             <Tutorial
-              isVisible={showReadTutorial}
-              onComplete={handleReadTutorialComplete}
-              onSkip={handleReadTutorialSkip}
+              isVisible={showReadTutorial || forceShowReadTutorial}
+              onComplete={() => { setForceShowReadTutorial(false); handleReadTutorialComplete(); }}
+              onSkip={() => { setForceShowReadTutorial(false); handleReadTutorialSkip(); }}
             />
           </>
         )}
