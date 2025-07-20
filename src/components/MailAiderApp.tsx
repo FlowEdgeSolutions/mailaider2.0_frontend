@@ -1,3 +1,4 @@
+// src/components/MailAiderApp.tsx
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Header } from "./Header";
@@ -17,6 +18,14 @@ import { useAppActions } from "@/hooks/useAppActions";
 import ComposeEditor from "./ComposeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// 🧠 Einheitlicher Typ für alle Email-Daten
+interface EmailData {
+  subject: string;
+  sender: string;
+  content: string;
+  summary: string;
+}
+
 interface SettingsData {
   tone: string;
   greeting: string;
@@ -25,8 +34,8 @@ interface SettingsData {
 }
 
 export function MailAiderApp() {
-  const devMode = true;              // 🛠 Dev-Modus aktivieren
-  const devComposeMode = false;     // true = Compose, false = Antwort/Lese
+  const devMode = false;            // Prod-Modus
+  const devComposeMode = false;
 
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [currentAction, setCurrentAction] = useState("antworten");
@@ -45,9 +54,9 @@ export function MailAiderApp() {
     isConnected,
     isComposeMode,
     isLoading: officeLoading,
-    emailData,
+    emailData: rawEmailData,
     composeData,
-    setEmailData,
+    setEmailData: setRawEmailData,
   } = useOfficeInitialization();
 
   useApiKeyManagement();
@@ -73,7 +82,6 @@ export function MailAiderApp() {
 
   const isLoading = officeLoading || aiLoading;
 
-  // 🔁 Effektive Werte (echte oder simulierte)
   const effectiveConnected = devMode ? true : isConnected;
   const effectiveComposeMode = devMode ? devComposeMode : isComposeMode;
 
@@ -91,10 +99,7 @@ export function MailAiderApp() {
     }
   };
 
-  const handleSettingsSubmit = async (
-    userPrompt: string,
-    recipientName?: string
-  ) => {
+  const handleSettingsSubmit = async (userPrompt: string, recipientName?: string) => {
     setIsSettingsOpen(false);
     await processEmailWithAI(
       currentAction,
@@ -122,12 +127,18 @@ export function MailAiderApp() {
     insertReply(chatOutput, effectiveComposeMode);
   };
 
+  // 📦 Sichere Zusammenführung mit Fallback für summary
+  const emailData: EmailData = {
+    ...rawEmailData,
+    summary: rawEmailData.summary ?? "",
+  };
+
+  const setEmailData = (data: EmailData) => {
+    setRawEmailData(data);
+  };
+
   return (
-    <div
-      className={`min-h-screen bg-background-secondary transition-all duration-500 ${
-        isDarkMode ? "dark" : ""
-      }`}
-    >
+    <div className={`min-h-screen bg-background-secondary transition-all duration-500 ${isDarkMode ? "dark" : ""}`}>
       <div className="max-w-md mx-auto p-3 space-y-3">
         <Header
           isDarkMode={isDarkMode}
@@ -139,8 +150,7 @@ export function MailAiderApp() {
         {!effectiveConnected && (
           <div className="bg-yellow-100 p-4 rounded-lg">
             <h3 className="font-bold">Warnung</h3>
-            <p>Die Verbindung zu Outlook konnte nicht hergestellt werden. 
-            Einige Funktionen sind möglicherweise eingeschränkt.</p>
+            <p>Die Verbindung zu Outlook konnte nicht hergestellt werden. Einige Funktionen sind möglicherweise eingeschränkt.</p>
           </div>
         )}
 

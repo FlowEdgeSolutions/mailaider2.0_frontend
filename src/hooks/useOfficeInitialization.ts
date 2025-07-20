@@ -19,7 +19,7 @@ interface ComposeData {
 export function useOfficeInitialization() {
   const [isComposeMode, setIsComposeMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
 
   const [emailData, setEmailData] = useState<EmailData>({
     subject: "",

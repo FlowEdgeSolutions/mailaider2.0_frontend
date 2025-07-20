@@ -1,20 +1,21 @@
 import { useEffect, useState } from "react";
 import ComposeEditor from "@/components/ComposeEditor";
-import { EmailViewer } from "@/components/EmailViewer";
+import { MailAiderApp } from "@/components/MailAiderApp";
 import { ModernLoading } from "@/components/ModernLoading";
 import { outlookService } from "@/services/outlookService";
+import { OutlookEmailData } from "@/services/outlookService";
 
 const Index = () => {
   const [initialized, setInitialized] = useState(false);
   const [composeMode, setComposeMode] = useState(false);
-  const [emailData, setEmailData] = useState({
+  const [emailData, setEmailData] = useState<OutlookEmailData>({
     subject: "",
     sender: "",
     content: "",
-    summary: ""
+    itemId: "",
+    conversationId: "",
+    messageClass: "",
   });
-  const [showSummary, setShowSummary] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function init() {
@@ -24,29 +25,19 @@ const Index = () => {
 
       if (!isCompose) {
         const data = await outlookService.getCurrentEmailData();
-        setEmailData({ ...data, summary: "" });
+        setEmailData(data);
       }
 
       setInitialized(true);
-      setLoading(false);
     }
     init();
   }, []);
 
   if (!initialized) {
-    return <ModernLoading stage="processing" message="Outlook wird initialisiert..." />;
+    return <ModernLoading stage="thinking" message="Outlook wird initialisiert..." />;
   }
 
-  return composeMode ? (
-    <ComposeEditor />
-  ) : (
-    <EmailViewer
-      emailData={emailData}
-      showSummary={showSummary}
-      onToggleSummary={() => setShowSummary((s) => !s)}
-      isLoading={loading}
-    />
-  );
+  return composeMode ? <ComposeEditor /> : <MailAiderApp emailData={emailData} />;
 };
 
 export default Index;
