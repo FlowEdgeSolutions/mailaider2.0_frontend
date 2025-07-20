@@ -177,8 +177,6 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
           <>
             <ComposeViewer
               composeData={composeData}
-              showDetails={showComposeDetails}
-              onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
               isLoading={isLoading}
               onComposeDataChange={update => setComposeData({ ...composeData, ...update })}
             />
@@ -203,16 +201,6 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onSettingsChange={setSettings}
               onSubmit={handleSettingsSubmit}
             />
-            {currentAction === "verfassen" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>✍️ Freier Modus – E-Mail verfassen</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ComposeEditor />
-                </CardContent>
-              </Card>
-            )}
           </>
         ) : (
           <>

@@ -12,13 +12,11 @@ interface ComposeData {
 
 interface ComposeViewerProps {
   composeData: ComposeData;
-  showDetails: boolean;
-  onToggleDetails: () => void;
   isLoading: boolean;
   onComposeDataChange?: (data: Partial<ComposeData>) => void;
 }
 
-export function ComposeViewer({ composeData, showDetails, onToggleDetails, isLoading, onComposeDataChange }: ComposeViewerProps) {
+export function ComposeViewer({ composeData, isLoading, onComposeDataChange }: ComposeViewerProps) {
   return (
     <div className="card-modern p-4 space-y-3 animate-slide-up" data-tutorial="compose-viewer">
       <div className="space-y-2">
@@ -45,45 +43,6 @@ export function ComposeViewer({ composeData, showDetails, onToggleDetails, isLoa
           disabled={isLoading}
         />
       </div>
-      {/* Details und Kontext wie gehabt */}
-      {showDetails && (
-        <div className="bg-accent rounded-xl p-3 border-l-4 border-primary animate-fade-in">
-          <h3 className="font-ui text-accent-foreground mb-2">Kontext:</h3>
-          <div className="text-sm font-body text-accent-foreground/80 space-y-1">
-            {composeData.to.length > 0 && (
-              <p><strong>Empfänger:</strong> {composeData.to.join(', ')}</p>
-            )}
-            {composeData.cc.length > 0 && (
-              <p><strong>CC:</strong> {composeData.cc.join(', ')}</p>
-            )}
-            {composeData.subject && (
-              <p><strong>Betreff:</strong> {composeData.subject}</p>
-            )}
-            {composeData.purpose && (
-              <p><strong>Zweck:</strong> {composeData.purpose}</p>
-            )}
-          </div>
-        </div>
-      )}
-      <Button
-        onClick={onToggleDetails}
-        variant="outline"
-        size="sm"
-        className="w-full transition-all duration-300 hover:scale-105"
-        disabled={isLoading}
-      >
-        {showDetails ? (
-          <>
-            <ChevronUp className="w-4 h-4 mr-2" />
-            Details verbergen
-          </>
-        ) : (
-          <>
-            <ChevronDown className="w-4 h-4 mr-2" />
-            Details anzeigen
-          </>
-        )}
-      </Button>
     </div>
   );
 }
