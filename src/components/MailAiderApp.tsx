@@ -19,7 +19,7 @@ import ComposeEditor from "./ComposeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Settings2 } from "lucide-react";
+import { Settings2, X, Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
@@ -135,35 +135,47 @@ function CorrectionPanel({ open, onClose, onExecute, disabled }: { open: boolean
   const [custom, setCustom] = React.useState("");
   if (!open) return null;
   return (
-    <div className="card-modern p-4 space-y-4 animate-slide-up bg-white dark:bg-[#0a1736] shadow-md mt-4">
-      <div className="font-bold text-lg text-foreground dark:text-white flex items-center gap-2">
-        <span>Mail korrigieren</span>
-      </div>
-      <div>
-        <Label className="mb-1 block dark:text-white">Korrekturart:</Label>
-        <Select value={mode} onValueChange={setMode}>
-          <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
-            <SelectValue placeholder="Korrektur wählen..." className="dark:text-white/80" />
-          </SelectTrigger>
-          <SelectContent className="dark:bg-[#0a1736] dark:text-white">
-            <SelectItem value="stilistisch">Stilistisch & sprachlich</SelectItem>
-            <SelectItem value="rechtschreibung">Nur Rechtschreibung</SelectItem>
-            <SelectItem value="umformulieren">Höflich umformulieren</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label className="mb-1 block dark:text-white">Zusätzliche Wünsche (optional):</Label>
-        <Textarea
-          value={custom}
-          onChange={e => setCustom(e.target.value)}
-          placeholder="z.B. besonders höflich, kurz halten, ..."
-          className="input-modern min-h-[80px] resize-none dark:border-zinc-700 dark:bg-[#0a1736] dark:text-white"
-        />
-      </div>
-      <div className="flex gap-3 mt-2">
-        <Button onClick={onClose} variant="outline" className="flex-1" type="button">Abbrechen</Button>
-        <Button onClick={() => onExecute(mode, custom)} className="flex-1 btn-primary" type="button" disabled={disabled}>Ausführen</Button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <div className="bg-white dark:bg-[#0a1736] rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-orange-100 text-orange-600 rounded-full p-2">
+              <Pencil className="w-5 h-5" />
+            </div>
+            <span className="font-bold text-xl text-foreground dark:text-white">Mail korrigieren</span>
+          </div>
+          <button onClick={onClose} className="rounded-full p-2 hover:bg-muted/60 dark:hover:bg-zinc-800 transition-colors">
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <Label className="mb-1 block dark:text-white">Korrekturart:</Label>
+            <Select value={mode} onValueChange={setMode}>
+              <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+                <SelectValue placeholder="Korrektur wählen..." className="dark:text-white/80" />
+              </SelectTrigger>
+              <SelectContent className="dark:bg-[#0a1736] dark:text-white">
+                <SelectItem value="stilistisch">Stilistisch & sprachlich</SelectItem>
+                <SelectItem value="rechtschreibung">Nur Rechtschreibung</SelectItem>
+                <SelectItem value="umformulieren">Höflich umformulieren</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="mb-1 block dark:text-white">Zusätzliche Wünsche (optional):</Label>
+            <Textarea
+              value={custom}
+              onChange={e => setCustom(e.target.value)}
+              placeholder="z.B. besonders höflich, kurz halten, ..."
+              className="input-modern min-h-[80px] resize-none dark:border-zinc-700 dark:bg-[#0a1736] dark:text-white"
+            />
+          </div>
+          <div className="flex gap-3 mt-2">
+            <Button onClick={onClose} variant="outline" className="flex-1" type="button">Abbrechen</Button>
+            <Button onClick={() => onExecute(mode, custom)} className="flex-1 btn-primary" type="button" disabled={disabled}>Ausführen</Button>
+          </div>
+        </div>
       </div>
     </div>
   );
