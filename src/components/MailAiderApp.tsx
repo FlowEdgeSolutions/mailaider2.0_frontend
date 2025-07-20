@@ -168,6 +168,27 @@ export function MailAiderApp() {
               onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
               isLoading={isLoading}
             />
+            <ChatInterface
+              output={chatOutput}
+              isLoading={isLoading}
+              currentAction={currentAction}
+              onCopy={handleCopyToClipboard}
+              onInsertReply={handleInsertReply}
+            />
+            <ActionButtons
+              currentAction={currentAction}
+              onActionSelect={handleActionSelect}
+              isConnected={effectiveConnected}
+              isComposeMode={effectiveComposeMode}
+            />
+            <SettingsModal
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+              currentAction={currentAction}
+              settings={settings}
+              onSettingsChange={setSettings}
+              onSubmit={handleSettingsSubmit}
+            />
             {currentAction === "verfassen" && (
               <Card>
                 <CardHeader>
@@ -180,39 +201,36 @@ export function MailAiderApp() {
             )}
           </>
         ) : (
-          <EmailViewer
-            emailData={emailData}
-            showSummary={showSummary}
-            onToggleSummary={handleSummaryToggle}
-            isLoading={isLoading}
-          />
+          <>
+            <EmailViewer
+              emailData={emailData}
+              showSummary={showSummary}
+              onToggleSummary={handleSummaryToggle}
+              isLoading={isLoading}
+            />
+            <ChatInterface
+              output={chatOutput}
+              isLoading={isLoading}
+              currentAction={currentAction}
+              onCopy={handleCopyToClipboard}
+              onInsertReply={handleInsertReply}
+            />
+            <ActionButtons
+              currentAction={currentAction}
+              onActionSelect={handleActionSelect}
+              isConnected={effectiveConnected}
+              isComposeMode={effectiveComposeMode}
+            />
+            <SettingsModal
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+              currentAction={currentAction}
+              settings={settings}
+              onSettingsChange={setSettings}
+              onSubmit={handleSettingsSubmit}
+            />
+          </>
         )}
-
-        {currentAction !== "verfassen" && (
-          <ChatInterface
-            output={chatOutput}
-            isLoading={isLoading}
-            currentAction={currentAction}
-            onCopy={handleCopyToClipboard}
-            onInsertReply={handleInsertReply}
-          />
-        )}
-
-        <ActionButtons
-          currentAction={currentAction}
-          onActionSelect={handleActionSelect}
-          isConnected={effectiveConnected}
-          isComposeMode={effectiveComposeMode}
-        />
-
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          currentAction={currentAction}
-          settings={settings}
-          onSettingsChange={setSettings}
-          onSubmit={handleSettingsSubmit}
-        />
 
         <StatusPopup
           isOpen={showStatusPopup}
