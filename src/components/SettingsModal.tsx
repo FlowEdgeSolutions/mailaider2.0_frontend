@@ -20,9 +20,14 @@ interface SettingsModalProps {
   onSubmit: (userPrompt: string, recipientName?: string) => void;
 }
 
+const ALL_LANGUAGES = [
+  'Deutsch', 'Englisch', 'Französisch', 'Italienisch', 'Spanisch', 'Portugiesisch', 'Niederländisch', 'Polnisch', 'Russisch', 'Türkisch', 'Arabisch', 'Chinesisch', 'Japanisch', 'Koreanisch', 'Hindi', 'Schwedisch', 'Norwegisch', 'Dänisch', 'Finnisch', 'Tschechisch', 'Ungarisch', 'Griechisch', 'Rumänisch', 'Bulgarisch', 'Kroatisch', 'Serbisch', 'Slowakisch', 'Slowenisch', 'Ukrainisch', 'Hebräisch', 'Vietnamesisch', 'Thailändisch', 'Indonesisch', 'Malaiisch', 'Filipino', 'Estnisch', 'Lettisch', 'Litauisch', 'Isländisch', 'Georgisch', 'Armenisch', 'Kasachisch', 'Aserbaidschanisch', 'Usbekisch', 'Albanisch', 'Mazedonisch', 'Bosnisch', 'Montenegrinisch', 'Weißrussisch', 'Luxemburgisch', 'Afrikaans', 'Swahili', 'Zulu', 'Xhosa', 'Somali', 'Paschtu', 'Persisch', 'Urdu', 'Bengalisch', 'Tamil', 'Telugu', 'Marathi', 'Gujarati', 'Punjabi', 'Kannada', 'Malayalam', 'Singhalesisch', 'Nepali', 'Laotisch', 'Khmer', 'Birmanisch', 'Mongolisch', 'Tibetisch', 'Maori', 'Samoanisch', 'Tonganisch', 'Fidschianisch', 'Haitianisch', 'Kreolisch', 'Esperanto', 'Latein', 'Walisisch', 'Irisch', 'Schottisch-Gälisch', 'Korsisch', 'Baskisch', 'Katalanisch', 'Galicisch', 'Okzitanisch', 'Bretonisch', 'Friesisch', 'Sardisch', 'Maltesisch', 'Luxemburgisch', 'Färöisch', 'Grönländisch', 'Inuktitut', 'Hawaiianisch', 'Quechua', 'Aymara', 'Guarani', 'Nahuatl', 'Mapudungun', 'Rapanui', 'Tahitianisch', 'Samoanisch', 'Tonganisch', 'Fidschianisch', 'Haitianisch', 'Kreolisch', 'Esperanto', 'Latein', 'Walisisch', 'Irisch', 'Schottisch-Gälisch', 'Korsisch', 'Baskisch', 'Katalanisch', 'Galicisch', 'Okzitanisch', 'Bretonisch', 'Friesisch', 'Sardisch', 'Maltesisch', 'Luxemburgisch', 'Färöisch', 'Grönländisch', 'Inuktitut', 'Hawaiianisch', 'Quechua', 'Aymara', 'Guarani', 'Nahuatl', 'Mapudungun', 'Rapanui', 'Tahitianisch'
+];
+
 export function SettingsModal({ isOpen, onClose, currentAction, settings, onSettingsChange, onSubmit }: SettingsModalProps) {
   const [userPrompt, setUserPrompt] = useState('');
   const [recipientName, setRecipientName] = useState('');
+  const [languageSearch, setLanguageSearch] = useState('');
 
   const handleSubmit = () => {
     onSubmit(userPrompt, recipientName || undefined);
@@ -43,6 +48,12 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
       default: return 'Einstellungen';
     }
   };
+
+  // Sprachen sortieren: Deutsch immer oben, Rest alphabetisch
+  const filteredLanguages = [
+    'Deutsch',
+    ...ALL_LANGUAGES.filter(l => l !== 'Deutsch' && l.toLowerCase().includes(languageSearch.toLowerCase())).sort((a, b) => a.localeCompare(b))
+  ];
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 ${
@@ -134,11 +145,21 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
                 <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary dark:border-border dark:bg-card">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-surface border-2 border-border shadow-lg dark:bg-card dark:border-border">
-                  <SelectItem value="deutsch" className="hover:bg-accent focus:bg-accent text-foreground">Deutsch</SelectItem>
-                  <SelectItem value="englisch" className="hover:bg-accent focus:bg-accent text-foreground">Englisch</SelectItem>
-                  <SelectItem value="französisch" className="hover:bg-accent focus:bg-accent text-foreground">Französisch</SelectItem>
-                  <SelectItem value="italienisch" className="hover:bg-accent focus:bg-accent text-foreground">Italienisch</SelectItem>
+                <SelectContent className="bg-surface border-2 border-border shadow-lg dark:bg-card dark:border-border max-h-64 overflow-y-auto">
+                 <div className="sticky top-0 z-10 bg-surface p-2">
+                   <input
+                     type="text"
+                     value={languageSearch}
+                     onChange={e => setLanguageSearch(e.target.value)}
+                     placeholder="Sprache suchen..."
+                     className="w-full px-2 py-1 rounded border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                   />
+                 </div>
+                  {filteredLanguages.map(lang => (
+                    <SelectItem key={lang} value={lang.toLowerCase()} className="hover:bg-accent focus:bg-accent text-foreground">
+                      {lang}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
