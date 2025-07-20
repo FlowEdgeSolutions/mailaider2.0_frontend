@@ -1,6 +1,7 @@
 import React from 'react';
 import { Mail, Users, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface ComposeData {
   to: string[];
@@ -14,9 +15,10 @@ interface ComposeViewerProps {
   showDetails: boolean;
   onToggleDetails: () => void;
   isLoading: boolean;
+  onComposeDataChange?: (data: Partial<ComposeData>) => void;
 }
 
-export function ComposeViewer({ composeData, showDetails, onToggleDetails, isLoading }: ComposeViewerProps) {
+export function ComposeViewer({ composeData, showDetails, onToggleDetails, isLoading, onComposeDataChange }: ComposeViewerProps) {
   return (
     <div className="card-modern p-4 space-y-3 animate-slide-up" data-tutorial="compose-viewer">
       <div className="space-y-2">
@@ -24,21 +26,26 @@ export function ComposeViewer({ composeData, showDetails, onToggleDetails, isLoa
           <Mail className="w-4 h-4" />
           E-Mail verfassen
         </h2>
-        
-        {composeData.to.length > 0 && (
-          <div className="flex items-center gap-2 text-xs font-body text-muted-foreground">
-            <Users className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate">An: {composeData.to.join(', ')}</span>
-          </div>
-        )}
-        
-        {composeData.subject && (
-          <div className="text-sm font-body text-foreground">
-            Betreff: {composeData.subject}
-          </div>
-        )}
+        {/* Empfänger Input */}
+        <Input
+          type="text"
+          placeholder="Empfänger (z.B. max@beispiel.de)"
+          value={composeData.to.join(', ')}
+          onChange={e => onComposeDataChange && onComposeDataChange({ to: e.target.value.split(',').map(s => s.trim()) })}
+          className="input-modern"
+          disabled={isLoading}
+        />
+        {/* Betreff Input */}
+        <Input
+          type="text"
+          placeholder="Betreff eingeben..."
+          value={composeData.subject}
+          onChange={e => onComposeDataChange && onComposeDataChange({ subject: e.target.value })}
+          className="input-modern"
+          disabled={isLoading}
+        />
       </div>
-
+      {/* Details und Kontext wie gehabt */}
       {showDetails && (
         <div className="bg-accent rounded-xl p-3 border-l-4 border-primary animate-fade-in">
           <h3 className="font-ui text-accent-foreground mb-2">Kontext:</h3>
@@ -58,7 +65,6 @@ export function ComposeViewer({ composeData, showDetails, onToggleDetails, isLoa
           </div>
         </div>
       )}
-
       <Button
         onClick={onToggleDetails}
         variant="outline"

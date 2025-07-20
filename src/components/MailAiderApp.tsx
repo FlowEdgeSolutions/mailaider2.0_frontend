@@ -62,6 +62,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     emailData: rawEmailData,
     composeData,
     setEmailData: setRawEmailData,
+    setComposeData,
   } = useOfficeInitialization();
 
   useApiKeyManagement();
@@ -179,6 +180,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               showDetails={showComposeDetails}
               onToggleDetails={() => setShowComposeDetails(!showComposeDetails)}
               isLoading={isLoading}
+              onComposeDataChange={update => setComposeData({ ...composeData, ...update })}
             />
             <ChatInterface
               output={chatOutput}
