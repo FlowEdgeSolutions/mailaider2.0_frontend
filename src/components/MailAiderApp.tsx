@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Settings2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 
 // 🧠 Einheitlicher Typ für alle Email-Daten
 interface EmailData {
@@ -129,6 +130,45 @@ function InlineSettings({ settings, onSettingsChange, disabled, onExecute }: { s
   );
 }
 
+function CorrectionPanel({ open, onClose, onExecute, disabled }: { open: boolean; onClose: () => void; onExecute: (mode: string, custom: string) => void; disabled?: boolean }) {
+  const [mode, setMode] = React.useState("stilistisch");
+  const [custom, setCustom] = React.useState("");
+  if (!open) return null;
+  return (
+    <div className="card-modern p-4 space-y-4 animate-slide-up bg-white dark:bg-[#0a1736] shadow-md mt-4">
+      <div className="font-bold text-lg text-foreground dark:text-white flex items-center gap-2">
+        <span>Mail korrigieren</span>
+      </div>
+      <div>
+        <Label className="mb-1 block dark:text-white">Korrekturart:</Label>
+        <Select value={mode} onValueChange={setMode}>
+          <SelectTrigger className="bg-white dark:bg-[#0a1736] dark:text-white dark:border-zinc-700">
+            <SelectValue placeholder="Korrektur wählen..." className="dark:text-white/80" />
+          </SelectTrigger>
+          <SelectContent className="dark:bg-[#0a1736] dark:text-white">
+            <SelectItem value="stilistisch">Stilistisch & sprachlich</SelectItem>
+            <SelectItem value="rechtschreibung">Nur Rechtschreibung</SelectItem>
+            <SelectItem value="umformulieren">Höflich umformulieren</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div>
+        <Label className="mb-1 block dark:text-white">Zusätzliche Wünsche (optional):</Label>
+        <Textarea
+          value={custom}
+          onChange={e => setCustom(e.target.value)}
+          placeholder="z.B. besonders höflich, kurz halten, ..."
+          className="input-modern min-h-[80px] resize-none dark:border-zinc-700 dark:bg-[#0a1736] dark:text-white"
+        />
+      </div>
+      <div className="flex gap-3 mt-2">
+        <Button onClick={onClose} variant="outline" className="flex-1" type="button">Abbrechen</Button>
+        <Button onClick={() => onExecute(mode, custom)} className="flex-1 btn-primary" type="button" disabled={disabled}>Ausführen</Button>
+      </div>
+    </div>
+  );
+}
+
 export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: MailAiderAppProps) {
   const devMode = false;            // Prod-Modus
   const devComposeMode = false;
@@ -138,6 +178,10 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [showComposeDetails, setShowComposeDetails] = useState(false);
+  const [showCorrection, setShowCorrection] = useState(false);
+  const [correctionLoading, setCorrectionLoading] = useState(false);
+  const [correctionOutput, setCorrectionOutput] = useState("");
+  const emailBodyRef = useRef<string>("");
 
   const [settings, setSettings] = useState<SettingsData>({
     tone: "formell",
@@ -231,6 +275,41 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     insertReply(chatOutput, effectiveComposeMode, composeData);
   };
 
+  // Funktion, um aktuellen E-Mail-Text aus Outlook zu holen
+  const fetchComposeBody = async () => {
+    if (window.Office?.context?.mailbox?.item?.body?.getAsync) {
+      return new Promise<string>(resolve => {
+        window.Office.context.mailbox.item.body.getAsync("text", res => {
+          resolve(res?.value || "");
+        });
+      });
+    }
+    return "";
+  };
+
+  // Korrektur ausführen
+  const handleCorrection = async (mode: string, custom: string) => {
+    setCorrectionLoading(true);
+    const body = await fetchComposeBody();
+    emailBodyRef.current = body;
+    let prompt = "";
+    if (mode === "stilistisch") prompt = "Korrigiere den Text stilistisch und grammatikalisch.";
+    if (mode === "rechtschreibung") prompt = "Korrigiere nur die Rechtschreibung.";
+    if (mode === "umformulieren") prompt = "Formuliere den Text höflich um.";
+    if (custom && custom.trim() !== "") prompt += " " + custom;
+    await processEmailWithAI(
+      "freierModus",
+      prompt,
+      undefined,
+      settings,
+      true,
+      { subject: "", sender: "", content: body, summary: "" },
+      composeData
+    );
+    setCorrectionOutput(chatOutput);
+    setCorrectionLoading(false);
+  };
+
   // 📦 Sichere Zusammenführung mit Fallback für summary
   const emailData: EmailData = {
     ...(emailDataProp || rawEmailData),
@@ -272,6 +351,36 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               onComposeDataChange={update => setComposeData({ ...composeData, ...update })}
             />
             <InlineSettings settings={settings} onSettingsChange={setSettings} disabled={isLoading} onExecute={prompt => handleSettingsSubmit(prompt)} />
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant={showCorrection ? "default" : "outline"}
+                className="flex-1 flex items-center gap-2"
+                onClick={() => setShowCorrection(v => !v)}
+                type="button"
+              >
+                <span role="img" aria-label="Korrigieren">✏️</span> Mail korrigieren
+              </Button>
+            </div>
+            <CorrectionPanel
+              open={showCorrection}
+              onClose={() => setShowCorrection(false)}
+              onExecute={handleCorrection}
+              disabled={correctionLoading}
+            />
+            {correctionOutput && (
+              <div className="card-modern p-4 mt-4 bg-white dark:bg-[#0a1736] shadow-md">
+                <div className="mb-2 font-semibold text-foreground dark:text-white">Korrigierte Version:</div>
+                <div className="whitespace-pre-line text-foreground dark:text-white">{correctionOutput}</div>
+                <div className="flex gap-2 mt-2">
+                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(correctionOutput)}>Kopieren</Button>
+                  <Button size="sm" onClick={async () => {
+                    if (window.Office?.context?.mailbox?.item?.body?.setAsync) {
+                      window.Office.context.mailbox.item.body.setAsync(correctionOutput, { coercionType: "text" });
+                    }
+                  }}>Einfügen</Button>
+                </div>
+              </div>
+            )}
             <ChatInterface
               output={chatOutput}
               isLoading={isLoading}

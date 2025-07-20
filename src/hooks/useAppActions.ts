@@ -22,21 +22,25 @@ export function useAppActions() {
   const insertReply = async (chatOutput: string, isComposeMode: boolean, composeData?: { to: string[]; subject: string }) => {
     try {
       if (isComposeMode) {
-        // Setze Empfänger
-        if (composeData?.to && composeData.to.length > 0 && window.Office?.context?.mailbox?.item?.to?.setAsync) {
+        // Setze Empfänger nur, wenn ausgefüllt
+        if (composeData?.to && composeData.to.length > 0 && composeData.to.some(addr => addr.trim() !== "") && window.Office?.context?.mailbox?.item?.to?.setAsync) {
           await new Promise<void>(resolve => {
             window.Office.context.mailbox.item.to.setAsync(composeData.to, () => resolve());
           });
         }
-        // Setze Betreff
-        if (composeData?.subject && window.Office?.context?.mailbox?.item?.subject?.setAsync) {
+        // Setze Betreff nur, wenn ausgefüllt
+        if (composeData?.subject && composeData.subject.trim() !== "" && window.Office?.context?.mailbox?.item?.subject?.setAsync) {
           await new Promise<void>(resolve => {
             window.Office.context.mailbox.item.subject.setAsync(composeData.subject, () => resolve());
           });
         }
-        // Füge Text ein
-        await outlookService.insertComposeText(chatOutput);
-        setStatusMessage("Text wurde in die E-Mail eingefügt");
+        // Füge Text ein, wenn vorhanden
+        if (chatOutput && chatOutput.trim() !== "") {
+          await outlookService.insertComposeText(chatOutput);
+          setStatusMessage("Text wurde in die E-Mail eingefügt");
+        } else {
+          setStatusMessage("Felder übernommen (kein generierter Text)");
+        }
       } else {
         await outlookService.insertReplyText(chatOutput);
         setStatusMessage("Antwort wurde in das Antwortformular eingefügt");

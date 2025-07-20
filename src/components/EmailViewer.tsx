@@ -82,15 +82,6 @@ export function EmailViewer({
           )}
         </Button>
 
-        <Button
-          onClick={() => setShowFullContent(!showFullContent)}
-          variant="ghost"
-          size="sm"
-          className="w-full text-xs text-muted-foreground underline hover:text-primary"
-        >
-          {showFullContent ? 'Originaltext verbergen' : 'Originaltext anzeigen'}
-        </Button>
-
         {showFullContent && (
           <div className="text-sm font-body text-foreground/90 bg-muted p-3 rounded-lg whitespace-pre-line border border-border animate-fade-in">
             {emailData.content}

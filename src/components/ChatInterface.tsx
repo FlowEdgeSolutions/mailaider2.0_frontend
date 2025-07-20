@@ -73,7 +73,7 @@ export function ChatInterface({ output, isLoading, currentAction, onCopy, onInse
               : 'opacity-0 transform translate-y-4 scale-95'
           }`}>
             <div className="text-sm font-body text-foreground leading-relaxed whitespace-pre-line max-h-[220px] overflow-y-auto pr-2 animate-fade-in custom-scrollbar">
-              {output && output !== 'Warte auf Ausgabe...'
+              {output && output.trim() !== '' && output !== 'Warte auf Ausgabe...'
                 ? output
                 : (
                     <span className="text-muted-foreground">Hier wird deine generierte E-Mail angezeigt.</span>
