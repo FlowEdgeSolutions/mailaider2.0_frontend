@@ -286,6 +286,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
       setSummaryOutput("");
       setChatOutput("Verarbeitung läuft...");
       const result = await generateSummaryString(emailData.content, settings);
+      console.log("[DEBUG] Zusammenfassung result:", result);
       if (result.success) {
         setSummaryOutput(result.result);
         setChatOutput("");
