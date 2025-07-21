@@ -212,6 +212,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   const [correctionLoading, setCorrectionLoading] = useState(false);
   const [correctionOutput, setCorrectionOutput] = useState("");
   const emailBodyRef = useRef<string>("");
+  const [summaryOutput, setSummaryOutput] = useState("");
 
   const [settings, setSettings] = useState<SettingsData>({
     tone: "formell",
@@ -239,6 +240,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     setChatOutput,
     processEmailWithAI,
     generateSummary,
+    generateSummaryString,
   } = useAIProcessing();
 
   // Tutorial-Flags manuell setzen
@@ -280,15 +282,29 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
 
   const handleSettingsSubmit = async (userPrompt: string, recipientName?: string) => {
     setIsSettingsOpen(false);
-    await processEmailWithAI(
-      currentAction,
-      userPrompt,
-      recipientName,
-      settings,
-      effectiveComposeMode,
-      emailData,
-      composeData
-    );
+    if (currentAction === "zusammenfassen") {
+      setSummaryOutput("");
+      setChatOutput("Verarbeitung läuft...");
+      const result = await generateSummaryString(emailData.content, settings);
+      if (result.success) {
+        setSummaryOutput(result.result);
+        setChatOutput("");
+      } else {
+        setSummaryOutput("");
+        setChatOutput(`❌ Fehler: ${result.error}`);
+      }
+    } else {
+      await processEmailWithAI(
+        currentAction,
+        userPrompt,
+        recipientName,
+        settings,
+        effectiveComposeMode,
+        emailData,
+        composeData
+      );
+      setSummaryOutput("");
+    }
   };
 
   const handleSummaryToggle = async () => {
@@ -404,7 +420,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
               </div>
             )}
             <ChatInterface
-              output={chatOutput}
+              output={currentAction === "zusammenfassen" ? summaryOutput : chatOutput}
               isLoading={isLoading}
               currentAction={currentAction}
               onCopy={handleCopyToClipboard}

@@ -209,11 +209,38 @@ export function useAIProcessing() {
     }
   };
 
+  /**
+   * Generiert eine Zusammenfassung des E-Mail-Inhalts und gibt sie als String zurück
+   */
+  const generateSummaryString = async (
+    emailContent: string,
+    settings: SettingsData
+  ): Promise<{ success: boolean; result: string; error?: string }> => {
+    setIsLoading(true);
+    try {
+      if (!validateEmailContent(emailContent)) {
+        setIsLoading(false);
+        return { success: false, result: "", error: "E-Mail-Inhalt ungültig" };
+      }
+      const result = await aiService.processEmail({
+        action: "summarize",
+        emailContent,
+        settings,
+      });
+      setIsLoading(false);
+      return result;
+    } catch (error) {
+      setIsLoading(false);
+      return { success: false, result: "", error: "Fehler bei der Zusammenfassung" };
+    }
+  };
+
   return {
     isLoading,
     chatOutput,
     setChatOutput,
     processEmailWithAI,
     generateSummary,
+    generateSummaryString,
   };
 }

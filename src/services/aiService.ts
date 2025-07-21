@@ -13,12 +13,7 @@ import { PROMPTS } from "../services/prompts";
 export interface AIRequest {
   action: "summarize" | "reply" | "translate" | "custom" | "compose";
   emailContent?: string;
-  settings: {
-    tone: string;
-    greeting: string;
-    length: string;
-    language: string;
-  };
+  settings: SettingsData;
   customPrompt?: string;
   recipientName?: string;
   composeContext?: {
@@ -40,6 +35,17 @@ export interface AIResponse {
   result: string;
   raw?: unknown;
   error?: string;
+}
+
+/**
+ * Typdefinition für SettingsData erweitern
+ */
+export interface SettingsData {
+  tone: string;
+  greeting: string;
+  length: string;
+  language: string;
+  region?: string;
 }
 
 /**
@@ -86,7 +92,7 @@ export class AIServiceImpl {
     try {
       const prompt = this.buildPrompt(request);
       // System-Prompt dynamisch mit Platzhalter ersetzen
-      const region = (request.settings as any)?.region || "Schweiz";
+      const region = request.settings.region || "Schweiz";
       const systemPrompt = PROMPTS.system.replace("{region}", region);
 
       const url = `${this.endpoint}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.version}`;
