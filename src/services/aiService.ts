@@ -1,5 +1,7 @@
 // src/services/aiService.ts
 
+import { PROMPTS } from "../services/prompts";
+
 /**
  * Interface für AI-Anfragen
  * @property action - Gewünschte Aktion (Zusammenfassen, Antworten, etc.)
@@ -83,6 +85,10 @@ export class AIServiceImpl {
 
     try {
       const prompt = this.buildPrompt(request);
+      // System-Prompt dynamisch mit Platzhalter ersetzen
+      const region = (request.settings as any)?.region || "Schweiz";
+      const systemPrompt = PROMPTS.system.replace("{region}", region);
+
       const url = `${this.endpoint}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.version}`;
 
       // API-Request mit Timeout-Signal
@@ -97,7 +103,7 @@ export class AIServiceImpl {
           messages: [
             {
               role: "system",
-              content: "Du bist ein E-Mail-Assistent. Verwende immer die Schweizer Rechtschreibung. Nutze den bereitgestellten E-Mail-Inhalt als Grundlage, sofern kein separater Benutzertext gegeben ist.",
+              content: systemPrompt,
             },
             { role: "user", content: prompt },
           ],
@@ -147,21 +153,33 @@ export class AIServiceImpl {
    * @returns string - Formattierter Prompt
    */
   private buildPrompt(req: AIRequest): string {
-    if (req.action === "compose" && req.composeContext) {
-      const { to, subject, purpose } = req.composeContext;
-      return `Verfasse eine neue E-Mail an ${to.join(", ")} mit Betreff "${subject}". Zweck: ${purpose}`;
-    }
-
     const base = `E-Mail-Inhalt:\n${req.emailContent ?? ""}\n` +
                  `Einstellungen: Ton=${req.settings.tone}, ` +
                  `Länge=${req.settings.length}, ` +
                  `Sprache=${req.settings.language}\n`;
 
     switch (req.action) {
-      case "summarize": return `Fasse diese E-Mail zusammen:\n${base}`;
-      case "reply": return `Schreibe eine Antwort:\n${base}`;
-      case "translate": return `Übersetze ins ${req.settings.language}:\n${base}`;
-      default: return `${base}${req.customPrompt || ""}`;
+      case "summarize":
+        return PROMPTS.summarize.replace("{base}", base);
+      case "reply":
+        return PROMPTS.reply
+          .replace("{base}", base)
+          .replace("{tone}", req.settings.tone);
+      case "translate":
+        return PROMPTS.translate
+          .replace("{language}", req.settings.language)
+          .replace("{base}", base);
+      case "compose":
+        if (req.composeContext) {
+          return PROMPTS.compose
+            .replace("{to}", req.composeContext.to.join(", "))
+            .replace("{subject}", req.composeContext.subject)
+            .replace("{purpose}", req.composeContext.purpose)
+            .replace("{tone}", req.settings.tone);
+        }
+        break;
+      default:
+        return `${base}${req.customPrompt || ""}`;
     }
   }
 }

@@ -9,6 +9,7 @@ interface SettingsData {
   greeting: string;
   length: string;
   language: string;
+  region?: string; // Optional: Region für System-Prompt
 }
 
 interface SettingsModalProps {
@@ -134,6 +135,19 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
                   placeholder="z.B. Maria, Herr Schmidt, ..."
                   className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary w-full dark:border-border dark:bg-card dark:text-foreground"
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-ui text-foreground">Region (optional):</label>
+                <Select value={settings.region || "Schweiz"} onValueChange={value => updateSetting('region', value)}>
+                  <SelectTrigger className="input-modern bg-surface border-2 border-border hover:border-primary/50 focus:border-primary dark:border-border dark:bg-card">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-surface border-2 border-border shadow-lg dark:bg-card dark:border-border">
+                    <SelectItem value="Schweiz" className="hover:bg-accent focus:bg-accent text-foreground">Schweiz</SelectItem>
+                    <SelectItem value="Deutschland" className="hover:bg-accent focus:bg-accent text-foreground">Deutschland</SelectItem>
+                    <SelectItem value="Österreich" className="hover:bg-accent focus:bg-accent text-foreground">Österreich</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}

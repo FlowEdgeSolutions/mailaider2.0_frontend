@@ -62,7 +62,10 @@ export function EmailViewer({
       )}
 
       <Button
-        onClick={onToggleSummary}
+        onClick={() => {
+          console.log('DEBUG: Zusammenfassung anzeigen - Inhalt:', emailData.content, 'Summary:', emailData.summary);
+          onToggleSummary();
+        }}
         variant="outline"
         size="sm"
         className="w-full transition-all duration-300 hover:scale-105"
@@ -80,22 +83,6 @@ export function EmailViewer({
           </>
         )}
       </Button>
-
-      <Button
-        onClick={() => setShowFullContent(v => !v)}
-        variant="ghost"
-        size="sm"
-        className="w-full text-xs text-muted-foreground"
-        style={{ marginTop: 0 }}
-      >
-        {showFullContent ? 'E-Mail-Inhalt verbergen' : 'E-Mail-Inhalt anzeigen'}
-      </Button>
-
-      {showFullContent && (
-        <div className="text-sm font-body text-foreground/90 bg-muted p-3 rounded-lg whitespace-pre-line border border-border animate-fade-in">
-          {emailData.content}
-        </div>
-      )}
     </div>
   );
 }

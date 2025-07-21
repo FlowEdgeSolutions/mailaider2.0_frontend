@@ -23,6 +23,7 @@ import { Settings, X, Wand2, HelpCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import { PROMPTS } from "../services/prompts";
 
 // 🧠 Einheitlicher Typ für alle Email-Daten
 interface EmailData {
@@ -37,6 +38,7 @@ interface SettingsData {
   greeting: string;
   length: string;
   language: string;
+  region?: string; // Optional: Region für System-Prompt
 }
 
 interface MailAiderAppProps {
@@ -216,6 +218,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     greeting: "informell",
     length: "kurz",
     language: "deutsch",
+    region: "Schweiz", // Default-Region
   });
 
   const {
@@ -321,9 +324,9 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     const body = await fetchComposeBody();
     emailBodyRef.current = body;
     let prompt = "";
-    if (mode === "stilistisch") prompt = "Korrigiere den Text stilistisch und grammatikalisch.";
-    if (mode === "rechtschreibung") prompt = "Korrigiere nur die Rechtschreibung.";
-    if (mode === "umformulieren") prompt = "Formuliere den Text höflich um.";
+    if (mode === "stilistisch") prompt = PROMPTS.correct;
+    if (mode === "rechtschreibung") prompt = PROMPTS.spelling;
+    if (mode === "umformulieren") prompt = PROMPTS.rephrase;
     if (custom && custom.trim() !== "") prompt += " " + custom;
     await processEmailWithAI(
       "freierModus",

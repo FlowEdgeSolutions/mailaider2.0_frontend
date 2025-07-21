@@ -4,6 +4,7 @@ import { Textarea } from "./ui/textarea";
 import { outlookService } from "../services/outlookService";
 import { aiService } from "../services/aiService";
 import { useToast } from "../hooks/use-toast";
+import { PROMPTS } from "../services/prompts";
 
 export default function ComposeEditor() {
   const [input, setInput] = useState("");
@@ -15,7 +16,7 @@ export default function ComposeEditor() {
     const response = await aiService.processEmail({
       action: "custom",
       emailContent: input,
-      customPrompt: "Korrigiere den Text stilistisch und grammatikalisch.",
+      customPrompt: PROMPTS.correct,
       settings: {
         tone: "neutral",
         greeting: "neutral",
