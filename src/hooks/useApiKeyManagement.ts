@@ -7,7 +7,9 @@ export function useApiKeyManagement() {
     if (savedApiKey) {
       aiService.setConfig({ apiKey: savedApiKey });
     } else {
-      console.warn('Kein API Key gefunden. GPT wird nicht funktionieren.');
+      // Fallback: Standard-Key aus aiService.ts bleibt aktiv
+      // Kein explizites Setzen nötig, da Konstruktor bereits Standard-Key setzt
+      console.warn('Kein API Key gefunden. Es wird der im Code hinterlegte Standard-Key verwendet. GPT wird ggf. eingeschränkt funktionieren.');
     }
   }, []);
 }
