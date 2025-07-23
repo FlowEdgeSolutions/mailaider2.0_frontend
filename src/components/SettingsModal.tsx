@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,6 +29,33 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
   const [userPrompt, setUserPrompt] = useState('');
   const [recipientName, setRecipientName] = useState('');
   const [languageSearch, setLanguageSearch] = useState('');
+  // API-Key State
+  const [apiKey, setApiKey] = useState('');
+  const [apiKeySaved, setApiKeySaved] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState('');
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem('mailaider-api-key') || '';
+    setApiKey(savedKey);
+    setApiKeySaved(!!savedKey);
+  }, [isOpen]);
+
+  const handleApiKeySave = () => {
+    if (apiKey.trim().length < 20) {
+      setApiKeyError('API-Key scheint zu kurz oder ungültig.');
+      setApiKeySaved(false);
+      return;
+    }
+    localStorage.setItem('mailaider-api-key', apiKey.trim());
+    setApiKeySaved(true);
+    setApiKeyError('');
+  };
+  const handleApiKeyDelete = () => {
+    localStorage.removeItem('mailaider-api-key');
+    setApiKey('');
+    setApiKeySaved(false);
+    setApiKeyError('');
+  };
 
   const handleSubmit = () => {
     onSubmit(userPrompt, recipientName || undefined);
@@ -81,6 +108,30 @@ export function SettingsModal({ isOpen, onClose, currentAction, settings, onSett
         </div>
 
         <div className="p-6 space-y-6">
+          {/* API-Key Verwaltung */}
+          <div className="space-y-2 border-b border-border pb-4 mb-4">
+            <label className="text-sm font-ui text-foreground font-semibold flex items-center gap-2">
+              API-Key für KI (OpenAI/Azure):
+              {apiKeySaved ? (
+                <span className="text-green-600 text-xs">Gespeichert</span>
+              ) : (
+                <span className="text-red-600 text-xs">Nicht gesetzt</span>
+              )}
+            </label>
+            <input
+              type="text"
+              value={apiKey}
+              onChange={e => { setApiKey(e.target.value); setApiKeySaved(false); setApiKeyError(''); }}
+              placeholder="API-Key hier einfügen..."
+              className="input-modern bg-surface border-2 border-border w-full dark:border-border dark:bg-card dark:text-foreground"
+            />
+            <div className="flex gap-2 mt-1">
+              <Button size="sm" onClick={handleApiKeySave} className="btn-primary">Speichern</Button>
+              <Button size="sm" variant="outline" onClick={handleApiKeyDelete}>Löschen</Button>
+            </div>
+            {apiKeyError && <div className="text-red-600 text-xs mt-1">{apiKeyError}</div>}
+            {!apiKeySaved && <div className="text-yellow-600 text-xs mt-1">Ohne gültigen API-Key funktioniert die KI nicht!</div>}
+          </div>
           {/* Settings for different actions */}
           {currentAction === 'antworten' && (
             <div className="space-y-4">

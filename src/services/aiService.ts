@@ -123,7 +123,17 @@ export class AIServiceImpl {
 
       if (!res.ok) {
         const errorText = await res.text();
-        throw new Error(`API ${res.status}: ${errorText}`);
+        let userError = '';
+        if (res.status === 401 || res.status === 403) {
+          userError = 'Authentifizierungsfehler: API-Key ungültig oder abgelaufen.';
+        } else if (res.status === 404) {
+          userError = 'API-Endpunkt nicht gefunden (404). Prüfe die Konfiguration.';
+        } else if (res.status >= 500) {
+          userError = 'Serverfehler bei der KI. Bitte später erneut versuchen.';
+        } else {
+          userError = `Fehler vom Server (${res.status}): ${errorText}`;
+        }
+        throw new Error(userError);
       }
 
       const data = await res.json();
@@ -137,18 +147,21 @@ export class AIServiceImpl {
     } catch (error: unknown) {
       // Timeout oder anderer Fehler
       clearTimeout(timeoutId); // Sicherheitshalber clearen
-      
-      const errorMessage = error instanceof Error 
-        ? error.name === "AbortError"
-          ? "Anfragezeitüberschreitung: Die Verbindung war zu langsam."
-          : error.message
-        : "Unbekannter Fehler";
-
-      console.error("AI Service Error:", error);
-      return { 
-        success: false, 
-        result: "", 
-        error: errorMessage 
+      let errorMessage = '';
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Timeout: Die Anfrage an die KI hat zu lange gedauert.';
+        } else {
+          errorMessage = error.message;
+        }
+      } else {
+        errorMessage = 'Unbekannter Fehler bei der KI-Anfrage.';
+      }
+      console.error('AI Service Error:', error);
+      return {
+        success: false,
+        result: '',
+        error: errorMessage,
       };
     }
   }
