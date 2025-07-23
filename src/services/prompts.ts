@@ -8,7 +8,7 @@ export const PROMPTS = {
   /**
    * Prompt für das Zusammenfassen einer E-Mail
    */
-  summarize: `Fasse die folgende E-Mail präzise und übersichtlich zusammen:\n\n{base}`,
+  summarize: `Fasse die folgende E-Mail präzise und übersichtlich zusammen und Liste es untereinander mit - auf:\n\n{base}`,
 
   /**
    * Prompt für das Antworten auf eine E-Mail
