@@ -232,6 +232,8 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
     setComposeData,
   } = useOfficeInitialization();
 
+  console.log("MailAiderApp wird gerendert", emailDataProp, rawEmailData);
+
   useApiKeyManagement();
 
   const {

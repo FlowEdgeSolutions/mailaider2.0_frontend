@@ -116,6 +116,7 @@ export function useOfficeInitialization() {
             content,
             summary: "",
           });
+          console.log("Geladene E-Mail:", subject, sender, content);
         }
       } catch (error) {
         console.error("Office Initialization Error:", error);
