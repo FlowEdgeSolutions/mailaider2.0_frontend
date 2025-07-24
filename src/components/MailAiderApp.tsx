@@ -337,6 +337,7 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
 
   const handleSummaryToggle = async () => {
     console.log("[DEBUG] Zusammenfassung-Button geklickt", showSummary, emailData.summary);
+    console.log("[DEBUG] E-Mail-Inhalt für Zusammenfassung:", emailData.content);
     // Passe die Bedingung an: Wenn Zusammenfassung leer ist, immer anfordern
     if (!showSummary && (!emailData.summary || emailData.summary.trim() === "")) {
       console.log("[DEBUG] Starte generateSummary mit Inhalt:", emailData.content);
