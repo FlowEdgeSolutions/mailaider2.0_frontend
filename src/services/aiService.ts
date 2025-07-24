@@ -52,112 +52,51 @@ export interface SettingsData {
  * Implementierung des AI-Services mit Timeout und verbesserter Fehlerbehandlung
  */
 export class AIServiceImpl {
-  // Konfiguration (sollte in Produktion aus Umgebungsvariablen oder Office-Einstellungen kommen)
-  private apiKey: string;
-  private endpoint: string;
-  private deployment: string;
-  private version: string;
-  private defaultTimeout: number = 15000; // 15 Sekunden Timeout
-
-  constructor(
-    apiKey: string = "9psvVslPXfp4xbJ9SzRXpfx9E9lP8TLiFcC3IZgf43RLNQA9RiV4JQQJ99BFACI8hq2XJ3w3AAABACOGHQcr",
-    endpoint: string = "https://openaiaddinapi.openai.azure.com",
-    deployment: string = "gpt-4o_MailAiderAi_OutlookAddIn",
-    version: string = "2025-01-01-preview"
-  ) {
-    this.apiKey = apiKey;
-    this.endpoint = endpoint;
-    this.deployment = deployment;
-    this.version = version;
-  }
-
   /**
    * Prüft ob der Service konfiguriert ist
-   * @returns boolean - True wenn API-Key vorhanden
+   * @returns boolean - True wenn Backend-URL vorhanden
    */
   public isConfigured(): boolean {
-    return Boolean(this.apiKey && this.apiKey.trim());
+    // Das Frontend benötigt keine API-Key-Prüfung mehr, sondern nur die Backend-URL
+    return true; // Immer true, solange das Backend erreichbar ist
   }
 
   /**
-   * Verarbeitet eine E-Mail-Anfrage mit Timeout-Schutz
+   * Verarbeitet eine E-Mail-Anfrage über das eigene Backend
    * @param request - AIRequest Objekt mit Anfragedaten
-   * @returns Promise<AIResponse> - Antwort des AI-Services
+   * @returns Promise<AIResponse> - Antwort des Backends
    */
   async processEmail(request: AIRequest): Promise<AIResponse> {
-    // Erstelle AbortController für Timeout-Steuerung
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.defaultTimeout);
-
     try {
+      // Prompt im Frontend bauen (optional: kann auch ins Backend verlagert werden)
       const prompt = this.buildPrompt(request);
-      // System-Prompt dynamisch mit Platzhalter ersetzen
-      const region = request.settings.region || "Schweiz";
-      const systemPrompt = PROMPTS.system.replace("{region}", region);
-
-      const url = `${this.endpoint}/openai/deployments/${this.deployment}/chat/completions?api-version=${this.version}`;
-
-      // API-Request mit Timeout-Signal
-      const res = await fetch(url, {
+      // Anfrage an das eigene Backend schicken
+      const res = await fetch("http://localhost:4000/api/ai", {
         method: "POST",
-        signal: controller.signal, // Verbindung mit Timeout verknüpfen
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": this.apiKey,
-        },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "system",
-              content: systemPrompt,
-            },
-            { role: "user", content: prompt },
-          ],
-          temperature: 0.6,
-          max_tokens: 1000,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
       });
-
-      // Clear timeout da Anfrage erfolgreich gestartet
-      clearTimeout(timeoutId);
-
       if (!res.ok) {
         const errorText = await res.text();
-        let userError = '';
-        if (res.status === 401 || res.status === 403) {
-          userError = 'Authentifizierungsfehler: API-Key ungültig oder abgelaufen.';
-        } else if (res.status === 404) {
-          userError = 'API-Endpunkt nicht gefunden (404). Prüfe die Konfiguration.';
-        } else if (res.status >= 500) {
-          userError = 'Serverfehler bei der KI. Bitte später erneut versuchen.';
-        } else {
-          userError = `Fehler vom Server (${res.status}): ${errorText}`;
-        }
-        throw new Error(userError);
+        return {
+          success: false,
+          result: '',
+          error: `Fehler vom Backend (${res.status}): ${errorText}`,
+        };
       }
-
       const data = await res.json();
-      console.log("🔎 OpenAI Response", data);
-
       return {
         success: true,
-        result: data.choices?.[0]?.message?.content?.trim() ?? "",
+        result: data.result ?? '',
         raw: data,
       };
     } catch (error: unknown) {
-      // Timeout oder anderer Fehler
-      clearTimeout(timeoutId); // Sicherheitshalber clearen
       let errorMessage = '';
       if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          errorMessage = 'Timeout: Die Anfrage an die KI hat zu lange gedauert.';
-        } else {
-          errorMessage = error.message;
-        }
+        errorMessage = error.message;
       } else {
-        errorMessage = 'Unbekannter Fehler bei der KI-Anfrage.';
+        errorMessage = 'Unbekannter Fehler bei der Backend-Anfrage.';
       }
-      console.error('AI Service Error:', error);
       return {
         success: false,
         result: '',

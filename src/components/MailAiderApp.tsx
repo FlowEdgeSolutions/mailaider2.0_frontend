@@ -214,6 +214,30 @@ export function MailAiderApp({ emailData: emailDataProp, forceComposeMode }: Mai
   const emailBodyRef = useRef<string>("");
   const [summaryOutput, setSummaryOutput] = useState("");
 
+  // Prompt-Input und Antwort-Handling
+  const [prompt, setPrompt] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSendPrompt = async () => {
+    setLoading(true);
+    setAiResponse("");
+    try {
+      const response = await fetch("http://localhost:4000/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt,
+         })
+      });
+      const data = await response.json();
+      setAiResponse(data.choices?.[0]?.message?.content || "Keine Antwort erhalten");
+    } catch (err) {
+      setAiResponse("Fehler beim Abrufen der Antwort.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [settings, setSettings] = useState<SettingsData>({
     tone: "formell",
     greeting: "informell",
